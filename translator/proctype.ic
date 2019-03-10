@@ -1,0 +1,13 @@
+#define F_CPU 16000000L
+
+void myfunc() {}
+
+proctype myproctype {}
+
+process Init : background
+{
+	state FS_START
+	{
+		restart;
+	}
+}

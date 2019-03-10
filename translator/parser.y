@@ -5,6 +5,7 @@
 	#include "ParserContext.h"
 	#include "iCIdentifier.h"
 	#include "iCMCUIdentifier.h"
+	#include "iCProcType.h"
 	#include "iCProcess.h"
 	#include "iCState.h"
 	#include "CCode.h"
@@ -64,6 +65,7 @@
 {
     iCIdentifier* ident;
     iCProgram* program;
+	iCProcType* proctype;
     iCProcess* process;
     iCState* state;
     iCStatement* statement;
@@ -96,6 +98,7 @@
 /***********************************************/
 /*                   TOKENS                    */
 /***********************************************/
+%token <token> TPROCTYPE        "proctype"
 %token <token> TPROC			"process"
 %token <token> TSTATE			"state"
 %token <token> TSTART			"start"
@@ -196,7 +199,8 @@
 /***********************************************/
 /*                   NODES                     */
 /***********************************************/
-%type <hyperprocess>		hp_definition	
+%type <hyperprocess>		hp_definition
+%type <proctype>            proctype_def
 %type <process>				proc_def
 %type <state_list>			proc_body
 %type <ccode>				c_code
@@ -370,6 +374,13 @@ program_item	:	var_declaration	//global var declarations
 						if(NULL!=$1)ic_program->add_process($1);		
 						$$ = NULL;
 					}
+				|	proctype_def		
+				{
+					printf("program_item before add_proctype\n");
+					if(NULL!=$1)ic_program->add_proctype($1);		
+					$$ = NULL;
+					printf("program_item after add_proctype\n");
+				}
 				|	hp_definition // hyperprocess definitions with hp name, vector, register & bit
 					{
 						if(NULL!=$1)ic_program->add_hyperprocess($1);
@@ -427,6 +438,17 @@ hp_definition	:	THYPERPROCESS TIDENTIFIER // 1  2
 						$1;$4;$5;$8;$9;$12;$13;$16;$17;
 					}
 				;
+
+//process type definition
+proctype_def : TPROCTYPE TIDENTIFIER // 1 2
+			   TLBRACE TRBRACE // 3 4
+			   {
+				   std::cout<<"before new proctype, name="<<$2->c_str()<<std::endl;
+			       $$ = new iCProcType(*$2, *parser_context);
+				   printf("after new proctype\n");
+				   printf("name=%s\n", $<proctype>$->name);
+				   delete $2;
+			   }; 
 
 //=================================================================================================
 //iCProcess object needs to be created before the states are parsed,
