@@ -63,29 +63,29 @@
 /***********************************************/
 %union 
 {
-    iCIdentifier* ident;
-    iCProgram* program;
+	iCIdentifier* ident;
+	iCProgram* program;
 	iCProcType* proctype;
-    iCProcess* process;
-    iCState* state;
-    iCStatement* statement;
-    CCode* ccode;
-    NodesList* nodes_list;
-    StateList* state_list;
-    iCBlockItemsList* block_items_list;
+	iCProcess* process;
+	iCState* state;
+	iCStatement* statement;
+	CCode* ccode;
+	NodesList* nodes_list;
+	StateList* state_list;
+	iCBlockItemsList* block_items_list;
 	iCBlockItem* block_item;
 	iCTimeout* timeout;
-    iCExpression* expression;
-    std::string *string;
-    iCStringList *str_list;
-    int token;
+	iCExpression* expression;
+	std::string *string;
+	iCStringList *str_list;
+	int token;
 	std::list<iCVariable*>* var_list;
 	iCHyperprocess* hyperprocess;
-    iCDeclarationList* decl_list;
-    iCProcessList* proc_list;
-    iCDeclaration* declaration;
+	iCDeclarationList* decl_list;
+	iCProcessList* proc_list;
+	iCDeclaration* declaration;
 	iCVariable* variable;
-    iCIdentifierList* ident_list;
+	iCIdentifierList* ident_list;
 	iCFunction* func;
 	std::vector<iCExpression*>* expr_list;
 	iCProgramItemsList* program_items_list;
@@ -457,34 +457,41 @@ proctype_def : TPROCTYPE TIDENTIFIER // 1 2
 			   TLBRACE TRBRACE
 			   {
 				   //check for proctype redefinition
+				   if (ic_program->proctype_defined(*$2))
+					   parser_context->err_msg("process type redefinition: %s already defined", $2->c_str());
+
 			       $$ = new iCProcType(*$2, *parser_context);
 				   delete $2;
 				   $1; $3; $4; $5; $6;
 			   };
 
 //proctype instantiation
-proctype_instantiation: TIDENTIFIER 
+proctype_instantiation: TIDENTIFIER TIDENTIFIER
 						{
 							//check whether such proctype exists
 							if (!ic_program->proctype_defined(*$1))
 								parser_context->err_msg("undefined proctype: %s", $1->c_str());
-						}
-						TIDENTIFIER
-						{
+
 							//check for process redefinition
-							const iCScope* scope = parser_context->get_proc_scope(*$3);
+							const iCScope* scope = parser_context->get_proc_scope(*$2);
 							if (NULL != scope)
 							{
 								//process already defined - gen error, but continue parsing anyway to check for more errors
 								parser_context->err_msg("process redefinition: %s already defined in %s",
-									$3->c_str(), scope->name.empty() ? "this scope" : scope->name.c_str());
+									$2->c_str(), scope->name.empty() ? "this scope" : scope->name.c_str());
 							}
+
+							//Create the iCProcess objects (w/o states or activator) and modify context
+							$<process>$ = new iCProcess(*$2, *parser_context);
+							parser_context->set_process($<process>$);//entering process definition
+							parser_context->open_scope(*$2);// enter process scope
+							delete $2;
 						}
 						TLPAREN TRPAREN TSEMIC
 						{
-							$$ = new iCProcess(*$3, *parser_context);
+							$$ = $<process>3;
 							$$->set_hp("background");
-							printf("proc %s hyperprocess: %s\n", $$->name.c_str(), $$->activator.c_str());
+							//printf("proc %s hyperprocess: %s\n", $$->name.c_str(), $$->activator.c_str());
 							parser_context->add_proc_to_scope($$->name);
 
 							//restore context
@@ -492,8 +499,7 @@ proctype_instantiation: TIDENTIFIER
 							parser_context->leave_isr();
 
 							delete $1;
-							delete $3;
-							$5; $6; $7;
+							$4; $5; $6;
 						};
 						
 //=================================================================================================
@@ -522,7 +528,6 @@ proc_def	:	TPROC TIDENTIFIER // 1 2
 				}
 				TCOLON TIDENTIFIER // 4 5
 				{
-
 					//hyperprocess defined check - hp needs to be defined beforehand
 					if(!ic_program->hp_defined(*$5))
 						parser_context->err_msg("undefined hyperprocess: %s", $5->c_str());

@@ -2,11 +2,16 @@
 
 void myfunc() {}
 
-//myproctype proc0 ();
-proctype myproctype () {}
-myproctype proc1 ();
-myproctype proc1();
-noproctype proc2();
+//myproctype proc0 (); //undefined proctype
+//proctype myproctype () {}
+//myproctype proc1 ();
+//myproctype proc1(); //duplicate proc instance
+
+proctype anotherproctype() {}
+anotherproctype proc2();
+//anotherproctype proc2();
+
+//proctype anotherproctype() {} //duplicate proctype
 
 process Init : background
 {
@@ -16,4 +21,4 @@ process Init : background
 	}
 }
 
-myproctype Init();
+//myproctype Init(); //duplicate with non-parameterized process
