@@ -12,13 +12,12 @@ void iCProcType::gen_code(CodeGenContext& context)
     context.set_location(line_num, filename);
     context.indent();
 
-    context.to_code_fmt("proctype %s was handled\n", this->name);
+    printf("proctype %s was handled\n", this->name.c_str());
 }
 
 iCProcType::iCProcType(const std::string& name, const ParserContext& context) : iCNode(context)
 {
-    std::cout << "proctype constructor call message;" << std::endl;
-    printf("name=%s\n", name);
+	printf("proctype %s constructor call message\n", name.c_str());
     this->line_num = context.line();
     this->name = name;
 }

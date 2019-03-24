@@ -2,7 +2,8 @@
 
 void myfunc() {}
 
-proctype myproctype {}
+proctype myproctype () {}
+myproctype proc1 ();
 
 process Init : background
 {

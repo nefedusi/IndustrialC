@@ -17,6 +17,7 @@ class iCProgram : public iCNode
 {
 	iCProcess* first_bkgrnd_process;//process that is initially active
 	iCHyperprocessMap hps;//map of all hyperprocesses
+	iCProctypeMap proctypes; //map of all proctypes
 	iCDeclarationList mcu_decls;//vector/register/bit name definitions
 	std::list<iCProcType*> proctypes_list;
 	iCProcessList procs; // does not own, auxiliary list for quick checks
@@ -35,6 +36,7 @@ public:
 	bool hp_defined(const std::string& activator);
 	const iCHyperprocessMap* get_hps() const {return &hps;} 
 	const iCHyperprocess* get_hp(const std::string& hp_name) const;
+	bool proctype_defined(const std::string& activator);
 	bool proc_defined(const std::string& proc_name) const;
 	const iCProcess* find_proc(const std::string& proc_name)const;
 	virtual void gen_code(CodeGenContext& context);

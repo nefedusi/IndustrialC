@@ -44,14 +44,10 @@ void iCProgram::gen_code(CodeGenContext& context)
 	//context.code<<std::endl;
 	context.to_code_fmt("\n");
 
-    printf("proctypes_list size=%d\n", proctypes_list.size());
     //proctypes definitions
     for (std::list<iCProcType*>::iterator i = proctypes_list.begin(); i != proctypes_list.end(); i++)
     {
-        printf("before proctype gen_code\n");
-        printf("%d\n", (*i) == NULL);
         (*i)->gen_code(context);
-        printf("after proctype gen_code\n");
     }
 
 	//process names enumerator
@@ -209,15 +205,15 @@ iCProgram::~iCProgram()
 
 void iCProgram::add_proctype(iCProcType* proctype)
 {
-    printf("entered add_proctype\n");
+    //printf("entered add_proctype\n");
     if (NULL == proctype)
     {
         std::cout << "iCProgram::add_proctype: NULL proctype" << std::endl;
         return;
     }
-    printf("proctypes_list size=%d\n", proctypes_list.size());
+    //printf("proctypes_list size=%d\n", proctypes_list.size());
     proctypes_list.push_back(proctype);
-    printf("proctypes_list size=%d\n", proctypes_list.size());
+    //printf("proctypes_list size=%d\n", proctypes_list.size());
 }
 
 //=================================================================================================
@@ -225,6 +221,7 @@ void iCProgram::add_proctype(iCProcType* proctype)
 //=================================================================================================
 void iCProgram::add_process( iCProcess* proc )
 {
+	printf("entered add_process\n");
 	//redefined process
 	if(NULL == proc)
 	{
@@ -239,12 +236,15 @@ void iCProgram::add_process( iCProcess* proc )
 	iCHyperprocessMap::iterator i = hps.find(proc->activator);
 	if(hps.end() == i)
 	{
+		printf("before deleting proc\n");
 		delete proc;
 		return;
 	}
 
+	printf("before second->add_proc\n");
 	i->second->add_proc(proc);
 	procs[proc->name] = proc; // auxiliary list for quick checks
+	printf("finish add_process func\n");
 }
 
 //=================================================================================================
@@ -253,6 +253,11 @@ void iCProgram::add_process( iCProcess* proc )
 bool iCProgram::hp_defined( const std::string& activator )
 {
 	return hps.count(activator);
+}
+
+bool iCProgram::proctype_defined(const std::string& activator)
+{
+	return proctypes.count(activator);
 }
 
 //=================================================================================================
