@@ -382,10 +382,8 @@ program_item	:	var_declaration	//global var declarations
 					}
 				|	proctype_instantiation
 					{
-						printf("before add_proctype_instantiation\n");
 						if(NULL!=$1)ic_program->add_process($1);		
 						$$ = NULL;
-						printf("after add_proctype_instantiation\n");
 					}
 				|	hp_definition // hyperprocess definitions with hp name, vector, register & bit
 					{
@@ -458,6 +456,7 @@ proctype_def : TPROCTYPE TIDENTIFIER // 1 2
 			   TLPAREN TRPAREN
 			   TLBRACE TRBRACE
 			   {
+				   //check for proctype redefinition
 			       $$ = new iCProcType(*$2, *parser_context);
 				   delete $2;
 				   $1; $3; $4; $5; $6;
@@ -465,24 +464,36 @@ proctype_def : TPROCTYPE TIDENTIFIER // 1 2
 
 //proctype instantiation
 proctype_instantiation: TIDENTIFIER 
-						//{
+						{
 							//check whether such proctype exists
-							//if (!ic_program->proctype_defined(*$1))
-								//parser_context->err_msg("undefined proctype: %s", $1->c_str());
-						//}
+							if (!ic_program->proctype_defined(*$1))
+								parser_context->err_msg("undefined proctype: %s", $1->c_str());
+						}
 						TIDENTIFIER
-						//{
-							//check whether proc instance can have such name
-						//}
+						{
+							//check for process redefinition
+							const iCScope* scope = parser_context->get_proc_scope(*$3);
+							if (NULL != scope)
+							{
+								//process already defined - gen error, but continue parsing anyway to check for more errors
+								parser_context->err_msg("process redefinition: %s already defined in %s",
+									$3->c_str(), scope->name.empty() ? "this scope" : scope->name.c_str());
+							}
+						}
 						TLPAREN TRPAREN TSEMIC
 						{
-							printf("entered proctype_instantiation rule\n");
-							$$ = new iCProcess(*$2, *parser_context);
+							$$ = new iCProcess(*$3, *parser_context);
 							$$->set_hp("background");
 							printf("proc %s hyperprocess: %s\n", $$->name.c_str(), $$->activator.c_str());
+							parser_context->add_proc_to_scope($$->name);
+
+							//restore context
+							parser_context->set_process(NULL);//leaving process definition
+							parser_context->leave_isr();
+
 							delete $1;
-							delete $2;
-							$3;$4;$5;
+							delete $3;
+							$5; $6; $7;
 						};
 						
 //=================================================================================================

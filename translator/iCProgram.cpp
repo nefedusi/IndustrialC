@@ -45,9 +45,9 @@ void iCProgram::gen_code(CodeGenContext& context)
 	context.to_code_fmt("\n");
 
     //proctypes definitions
-    for (std::list<iCProcType*>::iterator i = proctypes_list.begin(); i != proctypes_list.end(); i++)
+    for (iCProctypeMap::iterator i = proctypes.begin(); i != proctypes.end(); i++)
     {
-        (*i)->gen_code(context);
+        i->second->gen_code(context);
     }
 
 	//process names enumerator
@@ -187,8 +187,8 @@ iCProgram::~iCProgram()
 		delete i->second;
 
     //clear proctypes
-    for (std::list<iCProcType*>::iterator i = proctypes_list.begin(); i != proctypes_list.end(); i++)
-        delete *i;
+    for (iCProctypeMap::iterator i = proctypes.begin(); i != proctypes.end(); i++)
+        delete i->second;
 
 	//clear mcu declarations
 	for(iCDeclarationList::iterator i=mcu_decls.begin();i!=mcu_decls.end();i++)
@@ -211,9 +211,15 @@ void iCProgram::add_proctype(iCProcType* proctype)
         std::cout << "iCProgram::add_proctype: NULL proctype" << std::endl;
         return;
     }
-    //printf("proctypes_list size=%d\n", proctypes_list.size());
-    proctypes_list.push_back(proctype);
-    //printf("proctypes_list size=%d\n", proctypes_list.size());
+	if (proctype_defined(proctype->name))
+	{
+		printf("proctype %d already exists\n");
+		delete proctype;
+		return;
+	}
+	//proctypes.insert(proctype->name, proctype);
+	proctypes[proctype->name] = proctype;
+    //printf("proctypes size=%d\n", proctypes.size());
 }
 
 //=================================================================================================
@@ -221,7 +227,7 @@ void iCProgram::add_proctype(iCProcType* proctype)
 //=================================================================================================
 void iCProgram::add_process( iCProcess* proc )
 {
-	printf("entered add_process\n");
+	//printf("entered add_process\n");
 	//redefined process
 	if(NULL == proc)
 	{
@@ -236,15 +242,12 @@ void iCProgram::add_process( iCProcess* proc )
 	iCHyperprocessMap::iterator i = hps.find(proc->activator);
 	if(hps.end() == i)
 	{
-		printf("before deleting proc\n");
 		delete proc;
 		return;
 	}
 
-	printf("before second->add_proc\n");
 	i->second->add_proc(proc);
 	procs[proc->name] = proc; // auxiliary list for quick checks
-	printf("finish add_process func\n");
 }
 
 //=================================================================================================
@@ -255,9 +258,9 @@ bool iCProgram::hp_defined( const std::string& activator )
 	return hps.count(activator);
 }
 
-bool iCProgram::proctype_defined(const std::string& activator)
+bool iCProgram::proctype_defined(const std::string& name)
 {
-	return proctypes.count(activator);
+	return proctypes.count(name);
 }
 
 //=================================================================================================
