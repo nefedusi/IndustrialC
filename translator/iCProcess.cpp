@@ -87,9 +87,23 @@ void iCProcess::gen_timeout_code( CodeGenContext& context )
 //=================================================================================================
 //
 //=================================================================================================
+iCProcess::iCProcess(const std::string& name, const ParserContext& context) : name(name),
+start_state(NULL),
+stop_state(NULL),
+isr_driven(false),
+_has_timeouts(false),
+iCNode(context),
+isr_referenced(false)
+{
+	line_num = context.line();
+}
+
+//=================================================================================================
+//
+//=================================================================================================
 iCProcess::~iCProcess()
 {
-	for(StateList::iterator i=states.begin();i!=states.end();i++)
+	for (StateList::iterator i = states.begin(); i != states.end(); i++)
 		delete *i;
 }
 
@@ -103,20 +117,6 @@ bool iCProcess::has_state( const std::string& state_name ) const
 		if(state_name == (*i)->name)
 			return true;
 	return false;
-}
-
-//=================================================================================================
-//
-//=================================================================================================
-iCProcess::iCProcess( const std::string& name, const ParserContext& context ) :	name(name),
-	start_state(NULL),
-	stop_state(NULL),
-	isr_driven(false),
-	_has_timeouts(false),
-	iCNode(context),
-	isr_referenced(false)
-{
-	line_num = context.line();
 }
 
 //=================================================================================================

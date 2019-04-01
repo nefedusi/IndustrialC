@@ -54,7 +54,7 @@ void iCProgram::gen_code(CodeGenContext& context)
 	std::ostringstream proc_subroutines;
 	context.to_code_fmt("enum %s\n{\n", C_PROC_ENUM_NAME);
 	context.indent_depth++;
-	for(iCProcessList::iterator i=procs.begin();i!=procs.end();i++)
+	for(iCProcessMap::iterator i=procs.begin();i!=procs.end();i++)
 	{
 		iCProcess* proc = i->second;
 		const std::string& proc_name = proc->name;
@@ -74,7 +74,7 @@ void iCProgram::gen_code(CodeGenContext& context)
 
 	context.flush();
 
-	for(iCProcessList::iterator i=procs.begin();i!=procs.end();i++)
+	for(iCProcessMap::iterator i=procs.begin();i!=procs.end();i++)
 	{
 		iCProcess* proc = i->second;
 		const std::string& proc_name = proc->name;
@@ -211,14 +211,14 @@ void iCProgram::add_proctype(iCProcType* proctype)
         std::cout << "iCProgram::add_proctype: NULL proctype" << std::endl;
         return;
     }
-	if (proctype_defined(proctype->name))
+	if (proctype_defined(proctype->get_name()))
 	{
 		printf("proctype %d already exists\n");
 		delete proctype;
 		return;
 	}
-	//proctypes.insert(proctype->name, proctype);
-	proctypes[proctype->name] = proctype;
+	//proctypes.insert(proctype->get_name(), proctype);
+	proctypes[proctype->get_name()] = proctype;
     //printf("proctypes size=%d\n", proctypes.size());
 }
 
@@ -306,7 +306,7 @@ const iCHyperprocess* iCProgram::get_hp( const std::string& hp_name ) const
 //=================================================================================================
 //
 //=================================================================================================
-bool iCProgram::proc_defined( const std::string& proc_name ) const
+bool iCProgram::proc_defined(const std::string& proc_name) const
 {
 	return procs.end() != procs.find(proc_name);
 }
@@ -316,9 +316,17 @@ void iCProgram::second_pass()
 	
 }
 
-const iCProcess* iCProgram::find_proc( const std::string& proc_name )const
+/*const*/ iCProcType* iCProgram::find_proctype(const std::string& proctype_name) //const
 {
-	iCProcessList::const_iterator proc = procs.find(proc_name);
+	iCProctypeMap::const_iterator proctype = proctypes.find(proctype_name);
+	if (proctypes.end() == proctype)
+		return NULL;
+	else return proctype->second;
+}
+
+const iCProcess* iCProgram::find_proc(const std::string& proc_name)const
+{
+	iCProcessMap::const_iterator proc = procs.find(proc_name);
 	if(procs.end() == proc)
 		return NULL;
 	else return proc->second;

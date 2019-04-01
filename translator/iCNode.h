@@ -58,6 +58,6 @@ typedef std::ostringstream iCStream;
 typedef std::list<std::string> iCStringList;
 typedef std::map<std::string, iCHyperprocess*> iCHyperprocessMap;
 typedef std::map<std::string, iCProcType*> iCProctypeMap;
-typedef std::map<std::string, iCProcess*> iCProcessList;
+typedef std::map<std::string, iCProcess*> iCProcessMap;
 typedef std::vector<iCState*> StateList;
 typedef std::vector<iCIdentifier*> iCIdentifierList;

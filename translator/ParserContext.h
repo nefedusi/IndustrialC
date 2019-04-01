@@ -5,6 +5,7 @@
 #include <stdarg.h>
 
 class iCProgram;
+class iCProcType;
 class iCProcess;
 class iCState;
 class iCScope;
@@ -18,6 +19,7 @@ class iCFunction;
 class ParserContext
 {
 	const iCProgram* program;//does not own
+	iCProcType* proctype;
 	iCProcess* process;//does not own
 	iCState* state;//does not own
 	iCFunction* func;//does not own
@@ -44,7 +46,7 @@ public:
 	//the vars should be made local or global 
 	bool in_function()const{return NULL != func;}
 	void set_func(iCFunction* func) {this->func = func;}
-	iCFunction*  get_func() {return func;}
+	iCFunction* get_func() {return func;}
 
 	std::set<iCNode*> second_pass_nodes; //does not own
 
@@ -52,10 +54,12 @@ public:
 	~ParserContext();
 
 	void set_program(const iCProgram* program) {this->program = program;}
+	void set_proctype(iCProcType* proctype) {this->proctype = proctype;}
 	void set_process(iCProcess* process) {this->process = process;}
 	void set_state(iCState* state) {this->state = state;}
 	
 	const iCProgram* get_program() const {ICASSERT(NULL != program); return program;}
+	const iCProcType* get_proctype() const {/*ICASSERT(NULL != proctype);*/ return proctype; }//removed assert because vars in functions are used outside proctypes
 	const iCProcess* get_process() const {/*ICASSERT(NULL != process);*/ return process;}//removed assert because vars in functions are used outside processes
 	iCProcess* modify_process() {return process;}
 	const iCState* get_state() const {ICASSERT(NULL != state); return state;}

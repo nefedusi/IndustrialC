@@ -82,7 +82,7 @@
 	std::list<iCVariable*>* var_list;
 	iCHyperprocess* hyperprocess;
 	iCDeclarationList* decl_list;
-	iCProcessList* proc_list;
+	iCProcessMap* proc_map;
 	iCDeclaration* declaration;
 	iCVariable* variable;
 	iCIdentifierList* ident_list;
@@ -453,17 +453,35 @@ hp_definition	:	THYPERPROCESS TIDENTIFIER // 1  2
 
 //process type definition
 proctype_def : TPROCTYPE TIDENTIFIER // 1 2
-			   TLPAREN TRPAREN
-			   TLBRACE TRBRACE
-			   {
-				   //check for proctype redefinition
-				   if (ic_program->proctype_defined(*$2))
-					   parser_context->err_msg("process type redefinition: %s already defined", $2->c_str());
+				{
+					//check for proctype redefinition
+					if (ic_program->proctype_defined(*$2))
+						parser_context->err_msg("process type redefinition: %s already defined", $2->c_str());
 
-			       $$ = new iCProcType(*$2, *parser_context);
-				   delete $2;
-				   $1; $3; $4; $5; $6;
-			   };
+					//Create the iCProcType objects (w/o states or activator) and modify context
+					$<proctype>$ = new iCProcType(*$2, *parser_context);
+					parser_context->set_proctype($<proctype>$);//entering proctype definition
+					parser_context->open_scope(*$2);// enter proctype scope
+					delete $2;
+				}
+				TLPAREN TRPAREN //4 5
+				TLBRACE proc_body TRBRACE //6 7 8
+				{
+					//proc body has already been parsed - closing process scope
+					parser_context->close_scope();
+
+					//finalize the iCProcType and add it to scope
+					//if a redifinition took place the proc will have multiple instance in the scope but it's ok
+					$$ = $<proctype>3;
+					$$->add_states(*$7);
+
+					//restore context
+					parser_context->set_proctype(NULL);//leaving process definition
+					parser_context->leave_isr();
+
+					delete $7;
+					$1; $4; $5; $6; $8;
+				};
 
 //proctype instantiation
 proctype_instantiation: TIDENTIFIER TIDENTIFIER
@@ -492,7 +510,7 @@ proctype_instantiation: TIDENTIFIER TIDENTIFIER
 							$$ = $<process>3;
 							$$->set_hp("background");
 							//printf("proc %s hyperprocess: %s\n", $$->name.c_str(), $$->activator.c_str());
-							parser_context->add_proc_to_scope($$->name);
+							$$->add_states(*(ic_program->find_proctype(*$1)->get_states()));
 
 							//restore context
 							parser_context->set_process(NULL);//leaving process definition
