@@ -1,6 +1,7 @@
 #include "iCProgram.h"
 #include "CodeGenContext.h"
 #include "iCHyperprocess.h"
+#include "iCProcType.h"
 #include "iCProcess.h"
 #include "iCState.h"
 #include "iCFunction.h"
@@ -42,6 +43,12 @@ void iCProgram::gen_code(CodeGenContext& context)
 
 	//context.code<<std::endl;
 	context.to_code_fmt("\n");
+
+    //proctypes definitions
+    for (iCProctypeMap::iterator i = proctypes.begin(); i != proctypes.end(); i++)
+    {
+        i->second->gen_code(context);
+    }
 
 	//process names enumerator
 	std::ostringstream proc_subroutines;
@@ -177,7 +184,11 @@ iCProgram::~iCProgram()
 {
 	//clear the hyperprocesses
 	for(iCHyperprocessMap::iterator i=hps.begin();i!=hps.end();i++)
-		delete i->second;	
+		delete i->second;
+
+    //clear proctypes
+    for (iCProctypeMap::iterator i = proctypes.begin(); i != proctypes.end(); i++)
+        delete i->second;
 
 	//clear mcu declarations
 	for(iCDeclarationList::iterator i=mcu_decls.begin();i!=mcu_decls.end();i++)
@@ -192,11 +203,31 @@ iCProgram::~iCProgram()
 		delete *i;
 }
 
+void iCProgram::add_proctype(iCProcType* proctype)
+{
+    //printf("entered add_proctype\n");
+    if (NULL == proctype)
+    {
+        std::cout << "iCProgram::add_proctype: NULL proctype" << std::endl;
+        return;
+    }
+	if (proctype_defined(proctype->name))
+	{
+		printf("proctype %d already exists\n");
+		delete proctype;
+		return;
+	}
+	//proctypes.insert(proctype->name, proctype);
+	proctypes[proctype->name] = proctype;
+    //printf("proctypes size=%d\n", proctypes.size());
+}
+
 //=================================================================================================
 //
 //=================================================================================================
 void iCProgram::add_process( iCProcess* proc )
 {
+	//printf("entered add_process\n");
 	//redefined process
 	if(NULL == proc)
 	{
@@ -225,6 +256,11 @@ void iCProgram::add_process( iCProcess* proc )
 bool iCProgram::hp_defined( const std::string& activator )
 {
 	return hps.count(activator);
+}
+
+bool iCProgram::proctype_defined(const std::string& name)
+{
+	return proctypes.count(name);
 }
 
 //=================================================================================================

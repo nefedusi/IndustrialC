@@ -1,0 +1,18 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/translator/vs2017/IndustrialC
+/translator/bisonprepreport
+/translator/bisonreport
+/translator/iCProgram.cpp.bak
+/translator/iCProgram.h.bak
+/translator/input.iprepr
+/translator/output.cpp
+/translator/parser.cpp
+/translator/parser.hpp
+/translator/industrialc.exe
+/translator/prep_parser.cpp
+/translator/prep_parser.hpp
+/translator/prep_tokens.cpp
+/translator/tokens.cpp

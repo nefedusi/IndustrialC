@@ -5,6 +5,7 @@
 
 class CodeGenContext;
 class iCProcess;
+class iCProcType;
 class iCHyperprocess;
 class ParserContext;
 class iCFunction;
@@ -16,6 +17,7 @@ class iCProgram : public iCNode
 {
 	iCProcess* first_bkgrnd_process;//process that is initially active
 	iCHyperprocessMap hps;//map of all hyperprocesses
+	iCProctypeMap proctypes; //map of all proctypes
 	iCDeclarationList mcu_decls;//vector/register/bit name definitions
 	iCProcessList procs; // does not own, auxiliary list for quick checks
 	std::list<iCVariable*> var_list;//list of defined variables
@@ -25,6 +27,7 @@ public:
 	iCProgram(const ParserContext& context) : iCNode(context), first_bkgrnd_process(NULL){}
 	virtual ~iCProgram();
 	void add_hyperprocess(iCHyperprocess* hp);
+	void add_proctype(iCProcType* proctype);
 	void add_process(iCProcess* proc);
 	void add_mcu_declaration(iCDeclaration* decl);
 	void add_variable(iCVariable* var) { var_list.push_back(var); }
@@ -32,6 +35,7 @@ public:
 	bool hp_defined(const std::string& activator);
 	const iCHyperprocessMap* get_hps() const {return &hps;} 
 	const iCHyperprocess* get_hp(const std::string& hp_name) const;
+	bool proctype_defined(const std::string& activator);
 	bool proc_defined(const std::string& proc_name) const;
 	const iCProcess* find_proc(const std::string& proc_name)const;
 	virtual void gen_code(CodeGenContext& context);

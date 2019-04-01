@@ -19,6 +19,7 @@ iCInteger.cpp ^
 icmemory.cpp ^
 iCPostfixExpression.cpp ^
 iCPrimaryExpression.cpp ^
+iCProcType.cpp ^
 iCProcess.cpp ^
 iCProcStatusCheck.cpp ^
 iCProgram.cpp ^
