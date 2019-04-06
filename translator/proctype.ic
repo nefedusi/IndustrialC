@@ -3,15 +3,15 @@
 void myfunc() {}
 
 //myproctype proc0 (); //undefined proctype
-proctype myproctype () {
-	state FS_START
-	{
-		//restart;
-	}
-}
-myproctype proc1 ();
-myproctype proc1(); //duplicate proc instance
-myproctype proc2();
+//proctype myproctype () {
+//	state FS_START
+//	{
+//		//restart;
+//	}
+//}
+//myproctype proc0 ();
+//myproctype proc1(); //duplicate proc instance
+//myproctype proc2();
 
 //proctype anotherproctype() {}
 //anotherproctype proc2();

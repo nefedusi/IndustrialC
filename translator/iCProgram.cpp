@@ -227,7 +227,6 @@ void iCProgram::add_proctype(iCProcType* proctype)
 //=================================================================================================
 void iCProgram::add_process( iCProcess* proc )
 {
-	//printf("entered add_process\n");
 	//redefined process
 	if(NULL == proc)
 	{
@@ -242,6 +241,7 @@ void iCProgram::add_process( iCProcess* proc )
 	iCHyperprocessMap::iterator i = hps.find(proc->activator);
 	if(hps.end() == i)
 	{
+		printf("no proc activator with name %s found, deleting proc...\n", proc->activator);
 		delete proc;
 		return;
 	}

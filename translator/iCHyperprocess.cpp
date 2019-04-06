@@ -91,6 +91,7 @@ iCHyperprocess::~iCHyperprocess()
 {
 	for(iCProcessMap::iterator i=procs.begin();i!=procs.end();i++)
 	{
+		printf("try to delete proc %d %s\n", i->second, i->second->name.c_str());
 		delete i->second;
 	}
 }

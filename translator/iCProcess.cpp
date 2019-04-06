@@ -103,6 +103,7 @@ isr_referenced(false)
 //=================================================================================================
 iCProcess::~iCProcess()
 {
+	printf("iCProcess desctuctor\n");
 	for (StateList::iterator i = states.begin(); i != states.end(); i++)
 		delete *i;
 }
