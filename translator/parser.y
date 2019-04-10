@@ -6,6 +6,7 @@
 	#include "iCIdentifier.h"
 	#include "iCMCUIdentifier.h"
 	#include "iCProcType.h"
+	#include "iCProcTypeInstantiation.h"
 	#include "iCProcess.h"
 	#include "iCState.h"
 	#include "CCode.h"
@@ -66,6 +67,7 @@
 	iCIdentifier* ident;
 	iCProgram* program;
 	iCProcType* proctype;
+	iCProcTypeInstantiation* proctype_instantiation;
 	iCProcess* process;
 	iCState* state;
 	iCStatement* statement;
@@ -82,7 +84,7 @@
 	std::list<iCVariable*>* var_list;
 	iCHyperprocess* hyperprocess;
 	iCDeclarationList* decl_list;
-	iCProcessList* proc_list;
+	iCProcessMap* proc_map;
 	iCDeclaration* declaration;
 	iCVariable* variable;
 	iCIdentifierList* ident_list;
@@ -201,7 +203,7 @@
 /***********************************************/
 %type <hyperprocess>		hp_definition
 %type <proctype>            proctype_def
-%type <process>             proctype_instantiation
+%type <proctype_instantiation> proctype_instantiation
 %type <process>				proc_def
 %type <state_list>			proc_body
 %type <ccode>				c_code
@@ -366,23 +368,23 @@ program_item	:	var_declaration	//global var declarations
 					{
 						//check for redefinition: error message is generated inside check_identifier_defined (not a very explicit method...)
 						parser_context->check_identifier_defined(*$1);
-						parser_context->add_mcu_decl_to_scope(*$1); 
+						parser_context->add_mcu_decl_to_scope(*$1);
 						delete $1;	
 						$$ = NULL;
 					}
-				|	proc_def		
+				|	proc_def
 					{
-						if(NULL!=$1)ic_program->add_process($1);		
+						if(NULL!=$1)ic_program->add_process($1);
 						$$ = NULL;
 					}
-				|	proctype_def		
+				|	proctype_def
 					{
-						if(NULL!=$1)ic_program->add_proctype($1);		
+						if(NULL!=$1)ic_program->add_proctype($1);
 						$$ = NULL;
 					}
 				|	proctype_instantiation
 					{
-						if(NULL!=$1)ic_program->add_process($1);		
+						$1;
 						$$ = NULL;
 					}
 				|	hp_definition // hyperprocess definitions with hp name, vector, register & bit
@@ -453,25 +455,23 @@ hp_definition	:	THYPERPROCESS TIDENTIFIER // 1  2
 
 //process type definition
 proctype_def : TPROCTYPE TIDENTIFIER // 1 2
-			   TLPAREN TRPAREN
-			   TLBRACE TRBRACE
-			   {
-				   //check for proctype redefinition
-				   if (ic_program->proctype_defined(*$2))
-					   parser_context->err_msg("process type redefinition: %s already defined", $2->c_str());
+				TLPAREN TRPAREN
+				TLBRACE TRBRACE
+				{
+					printf("entered proctype_def rule\n");
+					//check for proctype redefinition
+					if (ic_program->proctype_defined(*$2))
+						parser_context->err_msg("process type redefinition: %s already defined", $2->c_str());
 
-			       $$ = new iCProcType(*$2, *parser_context);
-				   delete $2;
-				   $1; $3; $4; $5; $6;
-			   };
+					$$ = new iCProcType(*$2, *parser_context);
+					delete $2;
+					$1; $3; $4; $5; $6;
+				};
 
-//proctype instantiation
-proctype_instantiation: TIDENTIFIER TIDENTIFIER
+//process type instantiation
+proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
 						{
-							//check whether such proctype exists
-							if (!ic_program->proctype_defined(*$1))
-								parser_context->err_msg("undefined proctype: %s", $1->c_str());
-
+							printf("entered proctype_instantiation rule\n");
 							//check for process redefinition
 							const iCScope* scope = parser_context->get_proc_scope(*$2);
 							if (NULL != scope)
@@ -481,25 +481,21 @@ proctype_instantiation: TIDENTIFIER TIDENTIFIER
 									$2->c_str(), scope->name.empty() ? "this scope" : scope->name.c_str());
 							}
 
-							//Create the iCProcess objects (w/o states or activator) and modify context
-							$<process>$ = new iCProcess(*$2, *parser_context);
-							parser_context->set_process($<process>$);//entering process definition
-							parser_context->open_scope(*$2);// enter process scope
-							delete $2;
-						}
-						TLPAREN TRPAREN TSEMIC
-						{
-							$$ = $<process>3;
-							$$->set_hp("background");
+							//Create the iCProcess objects (w/o states or activator)
+							iCProcess* process = new iCProcess(*$2, *parser_context);
+							process->set_hp("background");
 							//printf("proc %s hyperprocess: %s\n", $$->name.c_str(), $$->activator.c_str());
-							parser_context->add_proc_to_scope($$->name);
+							parser_context->add_proc_to_scope(process->name);
 
-							//restore context
-							parser_context->set_process(NULL);//leaving process definition
-							parser_context->leave_isr();
+							//$$ = new iCProcTypeInstantiation(*$1, process);
+							$$ = new iCProcTypeInstantiation();
+							printf("before add_to_second_pass proctype_instantiation\n");
+							//parser_context->add_to_second_pass($$);
+							printf("after add_to_second_pass proctype_instantiation\n");
 
 							delete $1;
-							$4; $5; $6;
+							delete $2;
+							$3; $4; $5;
 						};
 						
 //=================================================================================================

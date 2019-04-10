@@ -54,7 +54,7 @@ void iCProgram::gen_code(CodeGenContext& context)
 	std::ostringstream proc_subroutines;
 	context.to_code_fmt("enum %s\n{\n", C_PROC_ENUM_NAME);
 	context.indent_depth++;
-	for(iCProcessList::iterator i=procs.begin();i!=procs.end();i++)
+	for(iCProcessMap::iterator i=procs.begin();i!=procs.end();i++)
 	{
 		iCProcess* proc = i->second;
 		const std::string& proc_name = proc->name;
@@ -74,7 +74,7 @@ void iCProgram::gen_code(CodeGenContext& context)
 
 	context.flush();
 
-	for(iCProcessList::iterator i=procs.begin();i!=procs.end();i++)
+	for(iCProcessMap::iterator i=procs.begin();i!=procs.end();i++)
 	{
 		iCProcess* proc = i->second;
 		const std::string& proc_name = proc->name;
@@ -258,9 +258,34 @@ bool iCProgram::hp_defined( const std::string& activator )
 	return hps.count(activator);
 }
 
-bool iCProgram::proctype_defined(const std::string& name)
+bool iCProgram::proctype_defined(const std::string& proctype_name)
 {
-	return proctypes.count(name);
+	return proctypes.count(proctype_name);
+}
+
+const iCProcType* iCProgram::find_proctype(const std::string& proctype_name) const
+{
+	iCProctypeMap::const_iterator proctype = proctypes.find(proctype_name);
+	if (proctypes.end() == proctype)
+	{
+		return NULL;
+	}
+	return proctype->second;
+}
+
+bool iCProgram::proc_defined(const std::string& proc_name) const
+{
+	return procs.end() != procs.find(proc_name);
+}
+
+const iCProcess* iCProgram::find_proc(const std::string& proc_name)const
+{
+	iCProcessMap::const_iterator proc = procs.find(proc_name);
+	if (procs.end() == proc)
+	{
+		return NULL;
+	}
+	return proc->second;
 }
 
 //=================================================================================================
@@ -303,23 +328,7 @@ const iCHyperprocess* iCProgram::get_hp( const std::string& hp_name ) const
 	return NULL;
 }
 
-//=================================================================================================
-//
-//=================================================================================================
-bool iCProgram::proc_defined( const std::string& proc_name ) const
-{
-	return procs.end() != procs.find(proc_name);
-}
-
 void iCProgram::second_pass()
 {
 	
-}
-
-const iCProcess* iCProgram::find_proc( const std::string& proc_name )const
-{
-	iCProcessList::const_iterator proc = procs.find(proc_name);
-	if(procs.end() == proc)
-		return NULL;
-	else return proc->second;
 }

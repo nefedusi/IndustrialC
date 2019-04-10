@@ -64,6 +64,7 @@ public:
 	unsigned long line() const {return line_num;}
 	unsigned long column() const {return start_col;}
 
+	//Add to set of iCNode*s in order to call their second_pass() methods during the secondary (post-parsing) analysis
 	void add_to_second_pass(iCNode* node) { second_pass_nodes.insert(node); }
 
 	void inc_line_num() {line_num++; end_col = start_col = 1;}
