@@ -327,8 +327,3 @@ const iCHyperprocess* iCProgram::get_hp( const std::string& hp_name ) const
 		return hp->second;
 	return NULL;
 }
-
-void iCProgram::second_pass()
-{
-	
-}

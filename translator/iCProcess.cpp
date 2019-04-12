@@ -1,7 +1,7 @@
 #include "iCProcess.h"
 #include "CodeGenContext.h"
-#include "iCState.h"
 #include "ParserContext.h"
+#include "iCState.h"
 
 //=================================================================================================
 //Code generator

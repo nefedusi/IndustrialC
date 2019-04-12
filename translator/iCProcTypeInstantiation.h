@@ -4,14 +4,18 @@
 
 class iCProgram;
 class iCProcess;
+class CodeGenContext;
+#include "CodeGenContext.h"
 
-class iCProcTypeInstantiation//: public iCNode
+class iCProcTypeInstantiation: public iCNode
 {
-	std::string proctype_name;
 	const iCProgram* program; // does not own
-	const iCProcess* instance; // does not own
+	const std::string proctype_name;
+	iCProcess* instance; // does not own
 public:
-	//iCProcTypeInstantiation() {}
-	//iCProcTypeInstantiation(const std::string& proctype_name, const iCProcess* instance);
-	//virtual void second_pass();
+	iCProcTypeInstantiation(const iCProgram* program, const std::string& proctype_name, iCProcess* instance);
+	~iCProcTypeInstantiation() { /*delete *proctype_name;*/ }
+
+	void gen_code(CodeGenContext& context) {}; //remove from iCNode?
+	void second_pass();
 };

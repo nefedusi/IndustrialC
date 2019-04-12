@@ -484,14 +484,13 @@ proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
 							//Create the iCProcess objects (w/o states or activator)
 							iCProcess* process = new iCProcess(*$2, *parser_context);
 							process->set_hp("background");
-							//printf("proc %s hyperprocess: %s\n", $$->name.c_str(), $$->activator.c_str());
+							//printf("proc %s hyperprocess: %s\n", process->name.c_str(), process->activator.c_str());
 							parser_context->add_proc_to_scope(process->name);
 
-							//$$ = new iCProcTypeInstantiation(*$1, process);
-							$$ = new iCProcTypeInstantiation();
-							printf("before add_to_second_pass proctype_instantiation\n");
-							//parser_context->add_to_second_pass($$);
-							printf("after add_to_second_pass proctype_instantiation\n");
+							$$ = new iCProcTypeInstantiation(ic_program, *$1, process);
+							//printf("before add_to_second_pass proctype_instantiation\n");
+							parser_context->add_to_second_pass($$);
+							//printf("after add_to_second_pass proctype_instantiation\n");
 
 							delete $1;
 							delete $2;

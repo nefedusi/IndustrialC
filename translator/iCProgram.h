@@ -2,7 +2,7 @@
 
 #include "iCNode.h"
 #include "iCVariable.h"
-#include "iCProcTypeInstantiation.h"
+#include "iCProcTypeInstantiation.h" //why without this parser.y says 'doesn't name a type?'
 
 class CodeGenContext;
 class iCProcess;
@@ -29,7 +29,7 @@ public:
 	virtual ~iCProgram();
 	void add_hyperprocess(iCHyperprocess* hp);
 	void add_proctype(iCProcType* proctype);
-	void add_proctype_instantiation(iCProcTypeInstantiation* instantiation);
+	//void add_proctype_instantiation(iCProcTypeInstantiation* instantiation);
 	void add_process(iCProcess* proc);
 	void add_mcu_declaration(iCDeclaration* decl);
 	void add_variable(iCVariable* var) { var_list.push_back(var); }
@@ -42,7 +42,7 @@ public:
 	bool proc_defined(const std::string& proctype_name) const;
 	const iCProcess* find_proc(const std::string& proc_name)const;
 	virtual void gen_code(CodeGenContext& context);
-	virtual void second_pass();
+	virtual void second_pass() {}
 
 #ifdef DEBUG
 	virtual const std::string& identify() const { return "iCProgram"}

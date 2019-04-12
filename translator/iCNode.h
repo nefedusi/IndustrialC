@@ -21,7 +21,7 @@ public:
     virtual ~iCNode() {}
 
 	virtual void gen_code(CodeGenContext& context) = 0;
-	virtual void second_pass() {}
+	virtual void second_pass() { printf("iCNode second_pass called\n"); }
 
 #ifdef DEBUG
 	virtual const std::string& identify() const { return "iCNode";}
