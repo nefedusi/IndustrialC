@@ -384,7 +384,7 @@ program_item	:	var_declaration	//global var declarations
 					}
 				|	proctype_instantiation
 					{
-						$1;
+						if (NULL != $1) ic_program->add_proctype_instantiation($1);
 						$$ = NULL;
 					}
 				|	hp_definition // hyperprocess definitions with hp name, vector, register & bit
@@ -487,6 +487,7 @@ proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
 							//printf("proc %s hyperprocess: %s\n", process->name.c_str(), process->activator.c_str());
 							parser_context->add_proc_to_scope(process->name);
 
+							//todo: add deleting memory for instantiation
 							$$ = new iCProcTypeInstantiation(ic_program, *$1, process);
 							//printf("before add_to_second_pass proctype_instantiation\n");
 							parser_context->add_to_second_pass($$);

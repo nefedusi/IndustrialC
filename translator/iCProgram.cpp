@@ -183,23 +183,27 @@ void iCProgram::gen_code(CodeGenContext& context)
 iCProgram::~iCProgram()
 {
 	//clear the hyperprocesses
-	for(iCHyperprocessMap::iterator i=hps.begin();i!=hps.end();i++)
+	for (iCHyperprocessMap::iterator i=hps.begin(); i!=hps.end(); i++)
 		delete i->second;
 
     //clear proctypes
     for (iCProctypeMap::iterator i = proctypes.begin(); i != proctypes.end(); i++)
         delete i->second;
 
+	//clear proctype_instantiations
+	for (std::list<iCProcTypeInstantiation*>::iterator i = instantiations.begin(); i != instantiations.end(); i++)
+		delete *i;
+
 	//clear mcu declarations
-	for(iCDeclarationList::iterator i=mcu_decls.begin();i!=mcu_decls.end();i++)
-		delete *i;	
+	for (iCDeclarationList::iterator i=mcu_decls.begin(); i!=mcu_decls.end(); i++)
+		delete *i;
 
 	//clear functions
-	for(std::list<iCFunction*>::iterator i=func_list.begin();i!=func_list.end();i++)
-		delete *i;	
+	for (std::list<iCFunction*>::iterator i=func_list.begin(); i!=func_list.end(); i++)
+		delete *i;
 
 	//clear variables
-	for(std::list<iCVariable*>::iterator i=var_list.begin();i!=var_list.end();i++)
+	for (std::list<iCVariable*>::iterator i=var_list.begin(); i!=var_list.end(); i++)
 		delete *i;
 }
 
@@ -220,6 +224,17 @@ void iCProgram::add_proctype(iCProcType* proctype)
 	//proctypes.insert(proctype->name, proctype);
 	proctypes[proctype->name] = proctype;
     //printf("proctypes size=%d\n", proctypes.size());
+}
+
+void iCProgram::add_proctype_instantiation(iCProcTypeInstantiation* instantiation)
+{
+	if (NULL == instantiation)
+	{
+		std::cout << "iCProgram::add_proctype_instantiation: NULL instantiation" << std::endl;
+		return;
+	}
+	instantiations.push_back(instantiation);
+	printf("iCProgram instantiation\n");
 }
 
 //=================================================================================================

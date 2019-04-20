@@ -35,5 +35,5 @@ void iCProcTypeInstantiation::second_pass()
 	printf("found valid proctype %s\n", proctype->name.c_str());
 
 	//instance->add_states(proctype->get_states());
-	program->add_process(instance);
+	program->add_process(instance); //-1 pointer
 }

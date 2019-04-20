@@ -2,15 +2,15 @@
 
 //void myfunc() {}
 
-//myproctype proc1 (); //OK
+myproctype proc1 (); //OK
 proctype myproctype () {}
 //myproctype proc1(); //duplicate proc instance
 //proctype myproctype() {} //duplicate proctype
-//myproctype proc2();
+myproctype proc2();
 
-//proctype anotherproctype() {}
-//anotherproctype aproc1();
-//anotherproctype aproc2();
+proctype anotherproctype() {}
+anotherproctype aproc1();
+anotherproctype aproc2();
 
 process Init : background
 {
