@@ -1,17 +1,16 @@
 #define F_CPU 16000000L
 
-void myfunc() {}
+//void myfunc() {}
 
-myproctype proc1 (); //undefined proctype
+//myproctype proc1 (); //OK
 proctype myproctype () {}
-//myproctype proc1 ();
 //myproctype proc1(); //duplicate proc instance
+//proctype myproctype() {} //duplicate proctype
+//myproctype proc2();
 
 //proctype anotherproctype() {}
-//anotherproctype proc2();
-//anotherproctype proc2();
-
-//proctype anotherproctype() {} //duplicate proctype
+//anotherproctype aproc1();
+//anotherproctype aproc2();
 
 process Init : background
 {
@@ -22,3 +21,11 @@ process Init : background
 }
 
 //myproctype Init(); //duplicate with non-parameterized process
+
+/*process Init2 : background
+{
+	state FS_START
+	{
+		restart;
+	}
+}*/

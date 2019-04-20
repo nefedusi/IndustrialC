@@ -14,6 +14,7 @@ const StateList& iCProcType::get_states()
 	return states;
 }
 
+//todo: remove gen_code
 void iCProcType::gen_code(CodeGenContext& context)
 {
 	//std::cout << "entered proctype codegen" << std::endl;
