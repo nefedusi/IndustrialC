@@ -67,7 +67,7 @@ public:
 	//Add to set of iCNode*s in order to call their second_pass() methods during the secondary (post-parsing) analysis
 	void add_to_second_pass(iCNode* node)
 	{
-		printf("entered add_to_second_pass\n");
+		printf("ParserContext: entered add_to_second_pass\n");
 		second_pass_nodes.insert(node);
 	}
 

@@ -1,6 +1,7 @@
 #include "iCProcType.h"
 #include "CodeGenContext.h"
 #include "ParserContext.h"
+#include "iCState.h"
 
 iCProcType::iCProcType(const std::string& name, const ParserContext& context) : iCNode(context)
 {
@@ -9,10 +10,24 @@ iCProcType::iCProcType(const std::string& name, const ParserContext& context) : 
     this->name = name;
 }
 
-const StateList& iCProcType::get_states()
+void iCProcType::add_states(const iCStateList& states)
 {
-	return states;
+	printf("iCProcType %s entered add_states\n", this->name.c_str());
+	this->states = states;
+	printf("iCProcType states size argument=%d, this->states size=%d\n", states.size(), this->states.size());
+	//todo: if (isr_driven) ? (see iCProcess)
 }
+
+//const iCStateList& iCProcType::copy_states() const
+//{
+//	iCStateList copied_states;// = states; //copy
+//	for (iCStateList::const_iterator i = states.begin(); i < states.end(); i++)
+//	{
+//		iCState *state = new iCState(**i);
+//		copied_states.push_back(state);
+//	}
+//	return states;
+//}
 
 //todo: remove gen_code
 void iCProcType::gen_code(CodeGenContext& context)

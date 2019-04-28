@@ -9,6 +9,7 @@
 //=================================================================================================
 void iCHyperprocess::gen_code( CodeGenContext& context )
 {
+	std::cout << "iCHyperprocess: gen_code for " << this->activator << std::endl;
 #ifdef ICDEBUG_TRACE
 	std::cout<<"iCHyperprocess::gen_code " << activator << "...";
 	std::cout.flush();

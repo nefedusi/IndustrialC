@@ -19,8 +19,8 @@ class iCProgram : public iCNode
 	iCProcess* first_bkgrnd_process;//process that is initially active
 	iCHyperprocessMap hps;//map of all hyperprocesses
 	iCProctypeMap proctypes; //map of all proctypes
-	//list of instantiations (just for controlling memory)
-	std::list<iCProcTypeInstantiation*> instantiations;
+
+	std::list<iCProcTypeInstantiation*> instantiations; //instantiations (just for memory control)
 	iCDeclarationList mcu_decls;//vector/register/bit name definitions
 	iCProcessMap procs; // does not own, auxiliary list for quick checks
 	std::list<iCVariable*> var_list;//list of defined variables

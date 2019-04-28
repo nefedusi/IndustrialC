@@ -16,3 +16,4 @@
 /translator/prep_parser.hpp
 /translator/prep_tokens.cpp
 /translator/tokens.cpp
+/.vs

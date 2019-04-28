@@ -52,6 +52,17 @@ void iCTimeout::gen_code( CodeGenContext& context )
 	context.to_code_fmt("}");
 }
 
+//iCTimeout::iCTimeout(const iCTimeout& timeout)
+//{
+//	//iCNode fields
+//	this->line_num = timeout.line_num;
+//	this->col_num = timeout.col_num;
+//	this->filename = timeout.filename;
+//
+//	this->period = timeout.period; //ptr
+//	this->body;
+//}
+
 //=================================================================================================
 //
 //=================================================================================================

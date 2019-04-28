@@ -3,22 +3,38 @@
 //void myfunc() {}
 
 myproctype proc1 (); //OK
-proctype myproctype () {}
-//myproctype proc1(); //duplicate proc instance
-//proctype myproctype() {} //duplicate proctype
-myproctype proc2();
-
-proctype anotherproctype() {}
-anotherproctype aproc1();
-anotherproctype aproc2();
-
-process Init : background
-{
+proctype myproctype () {
 	state FS_START
 	{
-		restart;
+		//restart;
+	}
+	state AnotherState
+	{
+
 	}
 }
+myproctype proc2();
+
+//myproctype proc1(); //duplicate proc instance
+//duplicate proctype
+/*proctype myproctype() {
+	state FS_START
+	{
+		//restart;
+	}
+}*/
+
+//proctype anotherproctype() {}
+//anotherproctype aproc1();
+//anotherproctype aproc2();
+
+//process Init : background
+//{
+//	state FS_START
+//	{
+//		restart;
+//	}
+//}
 
 //myproctype Init(); //duplicate with non-parameterized process
 

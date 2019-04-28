@@ -1,6 +1,8 @@
 #pragma once
 
 #include "common.h"
+#include <memory>
+
 class CodeGenContext;
 class ParserContext;
 
@@ -21,7 +23,7 @@ public:
     virtual ~iCNode() {}
 
 	virtual void gen_code(CodeGenContext& context) = 0;
-	virtual void second_pass() { printf("iCNode second_pass called\n"); }
+	virtual void second_pass() {}
 
 #ifdef DEBUG
 	virtual const std::string& identify() const { return "iCNode";}
@@ -59,5 +61,5 @@ typedef std::list<std::string> iCStringList;
 typedef std::map<std::string, iCHyperprocess*> iCHyperprocessMap;
 typedef std::map<std::string, iCProcType*> iCProctypeMap;
 typedef std::map<std::string, iCProcess*> iCProcessMap;
-typedef std::vector<iCState*> StateList;
+typedef std::vector<std::shared_ptr<iCState>> iCStateList;
 typedef std::vector<iCIdentifier*> iCIdentifierList;

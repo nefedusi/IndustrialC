@@ -16,6 +16,7 @@ ParserContext* parser_context = NULL; //externed in parser.h
 //=================================================================================================
 void iCProgram::gen_code(CodeGenContext& context)
 {
+	std::cout<<"iCProgram entered gen_code, procs size=" << procs.size() << std::endl;
 	//stub definitions
 	context.to_code_fmt("%s\n\n", C_STUB_DEFS);
 
@@ -44,6 +45,7 @@ void iCProgram::gen_code(CodeGenContext& context)
 	//context.code<<std::endl;
 	context.to_code_fmt("\n");
 
+	//todo: remove this
     //proctypes definitions
     for (iCProctypeMap::iterator i = proctypes.begin(); i != proctypes.end(); i++)
     {
@@ -84,7 +86,7 @@ void iCProgram::gen_code(CodeGenContext& context)
 			//state names enumerators
 			unsigned int state_id = 3;
 			context.to_code_fmt("enum %s_STATES\n{\n", proc_name.c_str());
-			for(StateList::const_iterator s=proc->states.begin();s!=proc->states.end();s++)
+			for(iCStateList::const_iterator s=proc->states.begin();s!=proc->states.end();s++)
 			{
 				iCState& state = **s;
 				if(!state.special)
@@ -217,7 +219,7 @@ void iCProgram::add_proctype(iCProcType* proctype)
     }
 	if (proctype_defined(proctype->name))
 	{
-		printf("proctype %d already exists\n");
+		printf("iCProgram::add_proctype: proctype %s already exists\n", proctype->name.c_str());
 		delete proctype;
 		return;
 	}
@@ -234,7 +236,7 @@ void iCProgram::add_proctype_instantiation(iCProcTypeInstantiation* instantiatio
 		return;
 	}
 	instantiations.push_back(instantiation);
-	printf("iCProgram instantiation\n");
+	printf("iCProgram add_proctype_instantiation ended, instantiations size=%d\n", instantiations.size());
 }
 
 //=================================================================================================
@@ -242,7 +244,7 @@ void iCProgram::add_proctype_instantiation(iCProcTypeInstantiation* instantiatio
 //=================================================================================================
 void iCProgram::add_process( iCProcess* proc )
 {
-	//printf("entered add_process\n");
+	printf("iCProgram entered add_process, name=%s\n", proc->name.c_str());
 	//redefined process
 	if(NULL == proc)
 	{
