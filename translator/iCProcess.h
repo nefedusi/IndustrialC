@@ -19,12 +19,11 @@ public:
 
     std::string name; 
 	std::string activator;
-    StateList states;
+    iCStateList states;
 	const iCState* start_state; //does not own
 	const iCState* stop_state; //does not own
 	
 	iCProcess(const std::string& name, const ParserContext& context);
-	virtual ~iCProcess();
 
 	void set_hp(const std::string& hp_name) 
 	{
@@ -32,7 +31,7 @@ public:
 		if(0 != activator.compare("background"))
 			isr_driven = true;
 	}
-	void add_states(const StateList& states);
+	void add_states(const iCStateList& states);
 	bool has_state(const std::string& state_name) const;
 	bool is_isr_driven() const {return isr_driven;}
 	virtual void gen_code(CodeGenContext& context);

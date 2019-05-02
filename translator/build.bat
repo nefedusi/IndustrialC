@@ -50,7 +50,8 @@ iCAtomicBlock.cpp ^
 iCJumpStatement.cpp ^
 iCResetTimeoutStatement.cpp ^
 iCCastExpression.cpp ^
-iCRestartStatement.cpp 
+iCRestartStatement.cpp ^
+iCProcTypeInstantiation.cpp
 @echo --------------------------------Done-------------------------------------
 
  

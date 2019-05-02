@@ -1,13 +1,15 @@
+#include <memory>
 #include "iCProcess.h"
 #include "CodeGenContext.h"
-#include "iCState.h"
 #include "ParserContext.h"
+#include "iCState.h"
 
 //=================================================================================================
 //Code generator
 //=================================================================================================
 void iCProcess::gen_code(CodeGenContext& context)
 {
+	std::cout << "iCProcess::gen_code " << name << std::endl;
 #ifdef ICDEBUG_TRACE
 	std::cout<<"iCProcess::gen_code " << name << "...";
 	std::cout.flush();
@@ -30,7 +32,7 @@ void iCProcess::gen_code(CodeGenContext& context)
 	context.indent_depth++;
 
 	//states
-	for(StateList::iterator i=states.begin();i!=states.end();i++)
+	for(iCStateList::iterator i=states.begin();i!=states.end();i++)
 		(*i)->gen_code(context);
 
 	//process footer
@@ -45,6 +47,7 @@ void iCProcess::gen_code(CodeGenContext& context)
 	std::cout<<"done iCProcess\n";
 	std::cout.flush();
 #endif
+	std::cout << "done iCProcess" << std::endl;
 }
 
 
@@ -71,7 +74,7 @@ void iCProcess::gen_timeout_code( CodeGenContext& context )
 	context.indent_depth++;
 
 	//states - states with timeouts only
-	for(StateList::iterator i=states.begin();i!=states.end();i++)
+	for(iCStateList::iterator i=states.begin();i!=states.end();i++)
 		if((*i)->has_timeout())
 			(*i)->gen_timeout_code(context);
 
@@ -85,21 +88,12 @@ void iCProcess::gen_timeout_code( CodeGenContext& context )
 }
 
 //=================================================================================================
-//
-//=================================================================================================
-iCProcess::~iCProcess()
-{
-	for(StateList::iterator i=states.begin();i!=states.end();i++)
-		delete *i;
-}
-
-//=================================================================================================
 //Check process has a state by this name
 //=================================================================================================
 bool iCProcess::has_state( const std::string& state_name ) const
 {
 	//TODO: optimize
-	for(StateList::const_iterator i=states.begin();i!=states.end();i++)
+	for(iCStateList::const_iterator i=states.begin();i!=states.end();i++)
 		if(state_name == (*i)->name)
 			return true;
 	return false;
@@ -122,15 +116,17 @@ iCProcess::iCProcess( const std::string& name, const ParserContext& context ) :	
 //=================================================================================================
 //
 //=================================================================================================
-void iCProcess::add_states( const StateList& states )
+void iCProcess::add_states( const iCStateList& states )
 {
+	printf("iCProcess %s entered add_states\n", this->name.c_str());
 	this->states = states;
+	printf("iCProcess states size argument=%d, this->states size=%d\n", states.size(), this->states.size());
 	if(isr_driven)
 	{
 		//pass isr_driven to states
-		for(StateList::iterator i=this->states.begin();i!=this->states.end();i++)
+		for(iCStateList::iterator i=this->states.begin(); i!=this->states.end(); i++)
 		{
-			iCState* state = *i;
+			std::shared_ptr<iCState> state = *i;
 			state->set_isr_driven();
 			if(state->has_timeout())
 				_has_timeouts = true;

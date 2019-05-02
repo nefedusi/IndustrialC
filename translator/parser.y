@@ -6,6 +6,7 @@
 	#include "iCIdentifier.h"
 	#include "iCMCUIdentifier.h"
 	#include "iCProcType.h"
+	#include "iCProcTypeInstantiation.h"
 	#include "iCProcess.h"
 	#include "iCState.h"
 	#include "CCode.h"
@@ -48,6 +49,7 @@
 	#include <stdarg.h> 
 	#include <typeinfo>
 	#include <set>
+	#include <memory>
 	
     iCProgram* ic_program = NULL; /* AST root */
 	extern ParserContext* parser_context;
@@ -66,12 +68,13 @@
 	iCIdentifier* ident;
 	iCProgram* program;
 	iCProcType* proctype;
+	iCProcTypeInstantiation* proctype_instantiation;
 	iCProcess* process;
 	iCState* state;
 	iCStatement* statement;
 	CCode* ccode;
 	NodesList* nodes_list;
-	StateList* state_list;
+	iCStateList* state_list;
 	iCBlockItemsList* block_items_list;
 	iCBlockItem* block_item;
 	iCTimeout* timeout;
@@ -82,7 +85,7 @@
 	std::list<iCVariable*>* var_list;
 	iCHyperprocess* hyperprocess;
 	iCDeclarationList* decl_list;
-	iCProcessList* proc_list;
+	iCProcessMap* proc_map;
 	iCDeclaration* declaration;
 	iCVariable* variable;
 	iCIdentifierList* ident_list;
@@ -201,7 +204,7 @@
 /***********************************************/
 %type <hyperprocess>		hp_definition
 %type <proctype>            proctype_def
-%type <process>             proctype_instantiation
+%type <proctype_instantiation> proctype_instantiation
 %type <process>				proc_def
 %type <state_list>			proc_body
 %type <ccode>				c_code
@@ -268,8 +271,7 @@
 }<block_items_list> //  <str_list>
 %destructor 
 {
-	for(StateList::iterator i=$$->begin();i!=$$->end();i++)
-		delete *i;
+	//smart pointers are used, no need to manually delete states
 	delete $$;
 }<state_list> 
 %destructor
@@ -366,23 +368,23 @@ program_item	:	var_declaration	//global var declarations
 					{
 						//check for redefinition: error message is generated inside check_identifier_defined (not a very explicit method...)
 						parser_context->check_identifier_defined(*$1);
-						parser_context->add_mcu_decl_to_scope(*$1); 
+						parser_context->add_mcu_decl_to_scope(*$1);
 						delete $1;	
 						$$ = NULL;
 					}
-				|	proc_def		
+				|	proc_def
 					{
-						if(NULL!=$1)ic_program->add_process($1);		
+						if(NULL!=$1)ic_program->add_process($1);
 						$$ = NULL;
 					}
-				|	proctype_def		
+				|	proctype_def
 					{
-						if(NULL!=$1)ic_program->add_proctype($1);		
+						if(NULL!=$1)ic_program->add_proctype($1);
 						$$ = NULL;
 					}
 				|	proctype_instantiation
 					{
-						if(NULL!=$1)ic_program->add_process($1);		
+						if (NULL != $1) ic_program->add_proctype_instantiation($1);
 						$$ = NULL;
 					}
 				|	hp_definition // hyperprocess definitions with hp name, vector, register & bit
@@ -453,25 +455,27 @@ hp_definition	:	THYPERPROCESS TIDENTIFIER // 1  2
 
 //process type definition
 proctype_def : TPROCTYPE TIDENTIFIER // 1 2
-			   TLPAREN TRPAREN
-			   TLBRACE TRBRACE
-			   {
-				   //check for proctype redefinition
-				   if (ic_program->proctype_defined(*$2))
-					   parser_context->err_msg("process type redefinition: %s already defined", $2->c_str());
+				TLPAREN TRPAREN
+				TLBRACE proc_body TRBRACE
+				{
+					printf("parser: entered proctype_def rule\n");
+					//check for proctype redefinition
+					if (ic_program->proctype_defined(*$2))
+						parser_context->err_msg("process type redefinition: %s already defined", $2->c_str());
 
-			       $$ = new iCProcType(*$2, *parser_context);
-				   delete $2;
-				   $1; $3; $4; $5; $6;
-			   };
+					$$ = new iCProcType(*$2, *parser_context);
+					$$->add_states(*$6);
 
-//proctype instantiation
-proctype_instantiation: TIDENTIFIER TIDENTIFIER
+					//todo: what's a reason to delete it?
+					delete $2;//proctype name
+					delete $6;//proc body (list of states)
+					$1; $3; $4; $5; $7;
+				};
+
+//process type instantiation
+proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
 						{
-							//check whether such proctype exists
-							if (!ic_program->proctype_defined(*$1))
-								parser_context->err_msg("undefined proctype: %s", $1->c_str());
-
+							printf("parser: entered proctype_instantiation rule\n");
 							//check for process redefinition
 							const iCScope* scope = parser_context->get_proc_scope(*$2);
 							if (NULL != scope)
@@ -481,25 +485,18 @@ proctype_instantiation: TIDENTIFIER TIDENTIFIER
 									$2->c_str(), scope->name.empty() ? "this scope" : scope->name.c_str());
 							}
 
-							//Create the iCProcess objects (w/o states or activator) and modify context
-							$<process>$ = new iCProcess(*$2, *parser_context);
-							parser_context->set_process($<process>$);//entering process definition
-							parser_context->open_scope(*$2);// enter process scope
-							delete $2;
-						}
-						TLPAREN TRPAREN TSEMIC
-						{
-							$$ = $<process>3;
-							$$->set_hp("background");
-							//printf("proc %s hyperprocess: %s\n", $$->name.c_str(), $$->activator.c_str());
-							parser_context->add_proc_to_scope($$->name);
+							//Create the iCProcess objects (w/o states or activator)
+							iCProcess* process = new iCProcess(*$2, *parser_context);
+							process->set_hp("background");
+							//printf("proc %s hyperprocess: %s\n", process->name.c_str(), process->activator.c_str());
+							parser_context->add_proc_to_scope(process->name);
 
-							//restore context
-							parser_context->set_process(NULL);//leaving process definition
-							parser_context->leave_isr();
+							$$ = new iCProcTypeInstantiation(ic_program, *$1, process);
+							parser_context->add_to_second_pass($$);
 
 							delete $1;
-							$4; $5; $6;
+							delete $2;
+							$3; $4; $5;
 						};
 						
 //=================================================================================================
@@ -566,7 +563,12 @@ proc_def	:	TPROC TIDENTIFIER // 1 2
 //variables already know their context (the process they belong to)
 //var_declaration is a simple list of vars. No iCVariableDeclaration objects are built here
 //=================================================================================================
-proc_body	: proc_body state {$1->push_back($2); $$=$1;}//states are stored in the list
+proc_body	: proc_body state 
+			{
+				//states are stored in the list
+				$1->push_back(std::shared_ptr<iCState>($2));
+				$$ = $1;
+			}
 			| proc_body var_declaration 
 			{
 				//Split the declaration into variables and feed them to the program
@@ -577,7 +579,11 @@ proc_body	: proc_body state {$1->push_back($2); $$=$1;}//states are stored in th
 				delete vars;
 				$$ = $1;
 			}
-			| state {$$ = new StateList(); $$->push_back($1); }
+			| state 
+			{
+				$$ = new iCStateList();
+				$$->push_back(std::shared_ptr<iCState>($1));
+			}
 			| var_declaration 
 			{
 				//Split the declaration into variables and feed them to the program
@@ -586,7 +592,7 @@ proc_body	: proc_body state {$1->push_back($2); $$=$1;}//states are stored in th
 					ic_program->add_variable(*i);
 				
 				delete vars;
-				$$ = new StateList();
+				$$ = new iCStateList();
 			}
 			;
 
@@ -1403,4 +1409,3 @@ int ic_error(const char *s)
 	parser_context->err_msg(s);
 	return 0;
 }
-

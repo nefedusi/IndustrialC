@@ -2,6 +2,7 @@
 
 #include "iCNode.h"
 #include "iCVariable.h"
+#include "iCProcTypeInstantiation.h" //why without this parser.y says 'doesn't name a type?'
 
 class CodeGenContext;
 class iCProcess;
@@ -18,8 +19,10 @@ class iCProgram : public iCNode
 	iCProcess* first_bkgrnd_process;//process that is initially active
 	iCHyperprocessMap hps;//map of all hyperprocesses
 	iCProctypeMap proctypes; //map of all proctypes
+
+	std::list<iCProcTypeInstantiation*> instantiations; //instantiations (just for memory control)
 	iCDeclarationList mcu_decls;//vector/register/bit name definitions
-	iCProcessList procs; // does not own, auxiliary list for quick checks
+	iCProcessMap procs; // does not own, auxiliary list for quick checks
 	std::list<iCVariable*> var_list;//list of defined variables
 	std::list<iCFunction*> func_list;//list of defined functions
 
@@ -28,6 +31,7 @@ public:
 	virtual ~iCProgram();
 	void add_hyperprocess(iCHyperprocess* hp);
 	void add_proctype(iCProcType* proctype);
+	void add_proctype_instantiation(iCProcTypeInstantiation* instantiation);
 	void add_process(iCProcess* proc);
 	void add_mcu_declaration(iCDeclaration* decl);
 	void add_variable(iCVariable* var) { var_list.push_back(var); }
@@ -36,10 +40,11 @@ public:
 	const iCHyperprocessMap* get_hps() const {return &hps;} 
 	const iCHyperprocess* get_hp(const std::string& hp_name) const;
 	bool proctype_defined(const std::string& activator);
-	bool proc_defined(const std::string& proc_name) const;
+	const iCProcType* find_proctype(const std::string& proctype_name) const;
+	bool proc_defined(const std::string& proctype_name) const;
 	const iCProcess* find_proc(const std::string& proc_name)const;
 	virtual void gen_code(CodeGenContext& context);
-	virtual void second_pass();
+	virtual void second_pass() {}
 
 #ifdef DEBUG
 	virtual const std::string& identify() const { return "iCProgram"}
