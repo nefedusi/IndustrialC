@@ -47,7 +47,6 @@ void iCProcess::gen_code(CodeGenContext& context)
 	std::cout<<"done iCProcess\n";
 	std::cout.flush();
 #endif
-	std::cout << "done iCProcess" << std::endl;
 }
 
 

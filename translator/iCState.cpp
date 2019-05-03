@@ -141,8 +141,7 @@ iCState::iCState( const std::string& name, const ParserContext& context )
 //=================================================================================================
 iCState::~iCState()
 {
-	std::cout << "iCState destructor" << std::endl;
-	std::cout << "iCState "<<this->name<<", address: "<< this << std::endl;
+	std::cout << "iCState destructor "<<this->name<<", address: "<< this << std::endl;
 	for(iCBlockItemsList::iterator i=block_items.begin();i!=block_items.end();i++)
 		delete *i;
 	if(NULL != timeout)

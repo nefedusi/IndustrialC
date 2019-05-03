@@ -17,10 +17,11 @@ class iCFunction;
 //=================================================================================================
 class ParserContext
 {
-	const iCProgram* program;//does not own
-	iCProcess* process;//does not own
-	iCState* state;//does not own
-	iCFunction* func;//does not own
+	const iCProgram* program; //does not own
+	iCProcType* proctype; //does not own
+	iCProcess* process; //does not own
+	iCState* state; //does not own
+	iCFunction* func; //does not own
 	iCScope* root_scope; //owns
 	iCScope* current_scope; //does not own
 
@@ -51,7 +52,8 @@ public:
 	ParserContext();
 	~ParserContext();
 
-	void set_program(const iCProgram* program) {this->program = program;}
+	void set_program(const iCProgram* program) { this->program = program; }
+	void set_proctype(iCProcType* proctype) { this->proctype = proctype; }
 	void set_process(iCProcess* process) {this->process = process;}
 	void set_state(iCState* state) {this->state = state;}
 	
@@ -88,6 +90,7 @@ public:
 	void add_var_to_scope(iCVariable* decl);
 	void add_state_to_scope(const std::string& name);
 	void add_proc_to_scope(const std::string& name);
+	void add_proctype_to_scope(const std::string& name);
 	void add_mcu_decl_to_scope(const std::string& name);
 	void add_func_to_scope(const std::string& func);
 
