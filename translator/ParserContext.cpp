@@ -77,6 +77,11 @@ void ParserContext::add_proc_to_scope(const std::string& name)
 	current_scope->processes.insert(name);
 }
 
+void ParserContext::add_proctype_to_scope(const std::string& name)
+{
+	current_scope->proctypes.insert(name);
+}
+
 //=================================================================================================
 //
 //=================================================================================================

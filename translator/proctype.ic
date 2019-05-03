@@ -6,7 +6,7 @@ myproctype proc1 (); //OK
 proctype myproctype () {
 	state FS_START
 	{
-		//restart;
+
 	}
 	state AnotherState
 	{
@@ -14,27 +14,38 @@ proctype myproctype () {
 	}
 }
 myproctype proc2();
-
 //myproctype proc1(); //duplicate proc instance
+
 //duplicate proctype
-/*proctype myproctype() {
+/*proctype myproctype()
+{
 	state FS_START
 	{
-		//restart;
+		
 	}
 }*/
 
-//proctype anotherproctype() {}
-//anotherproctype aproc1();
-//anotherproctype aproc2();
+proctype anotherproctype()
+{
+	state FS_START
+	{
 
-//process Init : background
-//{
-//	state FS_START
-//	{
-//		restart;
-//	}
-//}
+	}
+	state AnotherState
+	{
+
+	}
+}
+anotherproctype aproc1();
+anotherproctype aproc2();
+
+process Init : background
+{
+	state FS_START
+	{
+		restart;
+	}
+}
 
 //myproctype Init(); //duplicate with non-parameterized process
 

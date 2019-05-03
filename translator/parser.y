@@ -455,21 +455,35 @@ hp_definition	:	THYPERPROCESS TIDENTIFIER // 1  2
 
 //process type definition
 proctype_def : TPROCTYPE TIDENTIFIER // 1 2
-				TLPAREN TRPAREN
-				TLBRACE proc_body TRBRACE
 				{
 					printf("parser: entered proctype_def rule\n");
 					//check for proctype redefinition
 					if (ic_program->proctype_defined(*$2))
 						parser_context->err_msg("process type redefinition: %s already defined", $2->c_str());
 
-					$$ = new iCProcType(*$2, *parser_context);
-					$$->add_states(*$6);
+					$<proctype>$ = new iCProcType(*$2, *parser_context);
+					parser_context->set_proctype($<proctype>$); //entering proctype definition
+					parser_context->open_scope(*$2); //enter proctype scope
+					delete $2; //proctype name //todo: what's a reason to delete it?
+				}
+				TLPAREN TRPAREN
+				TLBRACE proc_body TRBRACE
+				{
+					//proc body has already been parsed - closing process scope
+					parser_context->close_scope();
 
-					//todo: what's a reason to delete it?
-					delete $2;//proctype name
-					delete $6;//proc body (list of states)
-					$1; $3; $4; $5; $7;
+					//finalize the iCProcType and add it to scope
+					//if a redifinition took place the proctype will have multiple instance in the scope but it's ok
+					$$ = $<proctype>3;
+					$$->add_states(*$7);
+					parser_context->add_proctype_to_scope($$->name);
+
+					//restore context
+					parser_context->set_proctype(NULL); //leaving proctype definition
+					//parser_context->leave_isr(); //todo:uncomment when isr will work
+
+					delete $7; //proc body (list of states) //todo: what's a reason to delete it?
+					$1;$4;$5;$6;$8;
 				};
 
 //process type instantiation
@@ -859,7 +873,7 @@ statement	:	TSET TSTATE TIDENTIFIER TSEMIC //set state <state_name>;
 			|	TRETURN TSEMIC		{ $$ = new iCJumpStatement("return",	NULL,	*parser_context);		delete $1; $2; }
 			|	TBREAK TSEMIC		{ $$ = new iCJumpStatement("break",		NULL,	*parser_context); 		delete $1; $2; }
 			|	TCONTINUE TSEMIC	{ $$ = new iCJumpStatement("continue",	NULL,	*parser_context);		delete $1; $2; }
-			|	TRESTART TSEMIC { $$ = new iCRestartStatement(*parser_context); $1;$2;}
+			|	TRESTART TSEMIC { $$ = new iCRestartStatement(*parser_context); $1;$2; }
 			;
 
 //subroutine to open a "for" loop scope before parsing the init statement

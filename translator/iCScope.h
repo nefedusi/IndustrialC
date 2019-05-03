@@ -15,6 +15,7 @@ public:
 	std::vector<iCVariable*> vars; //does not own
 	std::set<std::string> states;
 	std::set<std::string> processes; //does not own
+	std::set<std::string> proctypes; //does not own
 	std::set<std::string> mcu_decls;
 	std::set<std::string> funcs;
 
