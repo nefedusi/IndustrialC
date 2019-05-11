@@ -139,6 +139,21 @@ const iCScope* ParserContext::get_proc_scope(const std::string& name)const
 	return NULL;
 }
 
+const iCScope* ParserContext::get_proctype_scope(const std::string& name) const
+{
+	iCScope* scope = current_scope;
+	while (NULL != scope)
+	{
+		std::set<std::string>::iterator it = scope->proctypes.find(name);
+		if (scope->proctypes.end() != it)
+			return scope;
+
+		//go up the scope tree
+		scope = scope->prev_scope;
+	}
+	return NULL;
+}
+
 //=================================================================================================
 //
 //=================================================================================================

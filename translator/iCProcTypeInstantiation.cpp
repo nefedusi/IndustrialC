@@ -2,6 +2,7 @@
 #include "iCProgram.h"
 #include "iCProcType.h"
 #include "iCProcess.h"
+#include "iCScope.h"
 
 iCProcTypeInstantiation::iCProcTypeInstantiation(iCProgram* program, const std::string& proctype_name, 
 	iCProcess* instance) : program(program), proctype_name(proctype_name), instance(instance)
@@ -12,8 +13,6 @@ iCProcTypeInstantiation::iCProcTypeInstantiation(iCProgram* program, const std::
 
 void iCProcTypeInstantiation::second_pass()
 {
-	printf("iCProcTypeInstantiation entered second_pass\n");
-
 	if (NULL == instance)
 	{
 		printf("iCProcTypeInstantiation error - instance is null\n");
@@ -30,6 +29,14 @@ void iCProcTypeInstantiation::second_pass()
 	}
 	printf("iCProcTypeInstantiation found valid proctype %s\n", proctype->name.c_str());
 
+	iCVariablesList var_list = proctype->get_variables();
+	for (iCVariablesList::iterator i = var_list.begin(); i != var_list.end(); i++)
+	{
+		std::shared_ptr<iCVariable> var(new iCVariable(**i));
+		var->full_name = instance->name + "_" + (*i)->name;
+		std::cout << "iCProcTypeInstantiation: instance var full_name=" << var->full_name << ", scope_name=" << (*i)->scope->name << std::endl;
+		program->add_variable(var);
+	}
 	instance->add_states(proctype->get_states());
 	program->add_process(instance); //-1 pointer
 }

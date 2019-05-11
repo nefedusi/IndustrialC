@@ -82,7 +82,7 @@
 	std::string *string;
 	iCStringList *str_list;
 	int token;
-	std::list<iCVariable*>* var_list;
+	iCVariablesList* var_list;
 	iCHyperprocess* hyperprocess;
 	iCDeclarationList* decl_list;
 	iCProcessMap* proc_map;
@@ -357,9 +357,9 @@ program_items_list	:	program_items_list program_item { $$ = $1; $2; }
 program_item	:	var_declaration	//global var declarations
 					{
 						//split the declaration into separate variables and feed them to the program
-						//the variables are global, var_declaration is a simple list of iCVariable
+						//the variables are global, var_declaration is a simple list of iCVariable (shared_ptrs)
 						//no iCVaribleDeclaration objects are built or used here
-						for(std::list<iCVariable*>::iterator i=$1->begin();i!=$1->end();i++)
+						for(iCVariablesList::iterator i=$1->begin();i!=$1->end();i++)
 							ic_program->add_variable(*i);
 						delete $1;
 						$$ = NULL;
@@ -456,9 +456,10 @@ hp_definition	:	THYPERPROCESS TIDENTIFIER // 1  2
 //process type definition
 proctype_def : TPROCTYPE TIDENTIFIER // 1 2
 				{
+					//todo: check if one proctype is inside another, check the same on usual processes
 					printf("parser: entered proctype_def rule\n");
 					//check for proctype redefinition
-					if (ic_program->proctype_defined(*$2))
+					if (ic_program->proctype_defined(*$2)) //todo: replace with parser_context->get_proctype_scope ?
 						parser_context->err_msg("process type redefinition: %s already defined", $2->c_str());
 
 					$<proctype>$ = new iCProcType(*$2, *parser_context);
@@ -522,6 +523,7 @@ proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
 //process <proc_name> : <hp_name> { <proc_body> }
 proc_def	:	TPROC TIDENTIFIER // 1 2
 				{
+					printf("parser: entered proc_def rule\n");
 					//check for process redefinition
 					const iCScope* scope = parser_context->get_proc_scope(*$2);
 					if(NULL != scope)
@@ -586,9 +588,20 @@ proc_body	: proc_body state
 			| proc_body var_declaration 
 			{
 				//Split the declaration into variables and feed them to the program
-				std::list<iCVariable*>* vars = $2;
-				for(std::list<iCVariable*>::iterator i=vars->begin();i!=vars->end();i++)
-					ic_program->add_variable(*i);
+				iCVariablesList* vars = $2;
+
+				iCProcType* proctype = parser_context->modify_proctype();
+				if (NULL == proctype) //proc_body belongs to non-parameterized process
+				{
+					std::cout << "parser.body+var_decl branch: proc_body belongs to non-parameterized process" << std::endl;
+					for (iCVariablesList::iterator i = vars->begin(); i != vars->end(); i++)
+						ic_program->add_variable(*i);
+				} else //proc_body belongs to proctype
+				{
+					std::cout << "parser.body+var_decl branch: proc_body belongs to proctype, proctype_name=" << proctype->name << std::endl;
+					for (iCVariablesList::iterator i = vars->begin(); i != vars->end(); i++)
+						proctype->add_variable(*i);
+				}
 
 				delete vars;
 				$$ = $1;
@@ -601,9 +614,21 @@ proc_body	: proc_body state
 			| var_declaration 
 			{
 				//Split the declaration into variables and feed them to the program
-				std::list<iCVariable*>* vars = $1;
-				for(std::list<iCVariable*>::iterator i=vars->begin();i!=vars->end();i++)
-					ic_program->add_variable(*i);
+				iCVariablesList* vars = $1;
+				
+				iCProcType* proctype = parser_context->modify_proctype();
+				if (NULL == proctype) //proc_body belongs to non-parameterized process
+				{
+					std::cout << "parser.var_decl branch: proc_body belongs to non-parameterized process" << std::endl;
+					for (iCVariablesList::iterator i = vars->begin(); i != vars->end(); i++)
+						ic_program->add_variable(*i);
+				}
+				else //proc_body belongs to proctype
+				{
+					std::cout << "parser.var_decl branch: proc_body belongs to proctype, proctype_name=" << proctype->name << std::endl;
+					for (iCVariablesList::iterator i = vars->begin(); i != vars->end(); i++)
+						proctype->add_variable(*i);
+				}
 				
 				delete vars;
 				$$ = new iCStateList();
@@ -694,7 +719,7 @@ block_item	:	var_declaration
 					ICASSERT(NULL != parser_context->get_func() || NULL != parser_context->get_state());
 
 					//Build an iCVariableDeclaration object and pass it further
-					std::list<iCVariable*>* vars = $1;
+					iCVariablesList* vars = $1;
 					iCVariableDeclaration* decl = new iCVariableDeclaration(*parser_context);
 					decl->set_vars(*vars);
 					$$ = decl;
@@ -1279,16 +1304,16 @@ func_declarator			: TIDENTIFIER TLPAREN TRPAREN //function with empty parenthese
 param_list				: param_list TCOMMA param_declarator 
 						  {
 							  $$ = $1;
-							  $$->push_back($3);
+							  $$->push_back(std::shared_ptr<iCVariable>($3));
 							  delete $2;
 						  }
 						| param_declarator 
 						{
-							$$ = new std::list<iCVariable*>;
-							$$->push_back($1);
+							$$ = new iCVariablesList;
+							$$->push_back(std::shared_ptr<iCVariable>($1));
 						}
 						;
-
+//iCVariable*
 param_declarator		: decl_specs direct_declarator 
 						  {
 							  $$ = $2;
@@ -1298,38 +1323,38 @@ param_declarator		: decl_specs direct_declarator
 						;
 
 //=============================================================================
-//Variable Declaration
+//Variable Declaration (iCVariablesList*)
 //=============================================================================
 var_declaration			:	decl_specs init_declarator_list TSEMIC 
 							{
 								$$ = $2;
-								for(std::list<iCVariable*>::iterator i=$2->begin();i!=$2->end();i++)
+								for(iCVariablesList::iterator i=$2->begin();i!=$2->end();i++)
 								{
-									iCVariable* var = *i;
+									std::shared_ptr<iCVariable> var = *i;
 									var->set_type_specs(*$1);
 								}
 								delete $1;
 								$3;//suppress unused value warning
 							}
 						;
-
+//declaration specifieres (consists of type specifiers) (iCStringList*)
 decl_specs				:	decl_specs type_spec {$1->push_back(*$2); delete $2; $$=$1;}
 						|	type_spec {$$ = new iCStringList; $$->push_back(*$1); delete $1;}
 						;
-
+//list of declared variables of similar type (iCVariablesList*)
 init_declarator_list	:	init_declarator_list TCOMMA init_declarator 
 							{
 								$$=$1;
-								$1->push_back($3);
+								$1->push_back(std::shared_ptr<iCVariable>($3));
 								delete $2;
 							}
 						|	init_declarator 
 							{
-								$$ = new std::list<iCVariable*>;
-								$$->push_back($1);
+								$$ = new iCVariablesList;
+								$$->push_back(std::shared_ptr<iCVariable>($1));
 							}
 						;
-
+//declaration without (a) or with initializer (a = 5) (iCVariable*)
 init_declarator			:	direct_declarator {$$ = $1;}
 						|	direct_declarator TASSGN initializer 
 							{
@@ -1338,7 +1363,7 @@ init_declarator			:	direct_declarator {$$ = $1;}
 								delete $2;
 							}
 						;
-
+//iCVariable*
 //can be just as simple as a variable name
 //or an array name with dimensions in brackets, e.g. matrix[3][10]
 //in C these can get really complex, with pointers, function pointers etc.
@@ -1364,7 +1389,7 @@ direct_declarator		:	TIDENTIFIER
 							$2;$3;
 						}
 						;
-
+//iCInitializer*
 //initializers form a tree in case of multi-dimensional arrays
 //array initializer list can be optionally terminated with an extra comma (C legacy)
 initializer 			:	assignment_expr  //simple variable initializer
@@ -1384,6 +1409,7 @@ initializer 			:	assignment_expr  //simple variable initializer
 								$1;$4;
 							}
 						;
+//iCInitializer*
 initializer_list		:	initializer_list TCOMMA initializer 
 							{
 								$$ = $1;
@@ -1395,7 +1421,7 @@ initializer_list		:	initializer_list TCOMMA initializer
 								$$ = $1;
 							}
 						;
-
+//type specifier (std::string*)
 type_spec				:	TVOID	
 						|	TCHAR	
 						|	TINT		

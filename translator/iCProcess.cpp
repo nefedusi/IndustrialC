@@ -9,7 +9,7 @@
 //=================================================================================================
 void iCProcess::gen_code(CodeGenContext& context)
 {
-	std::cout << "iCProcess::gen_code " << name << std::endl;
+	//std::cout << "iCProcess::gen_code " << name << std::endl;
 #ifdef ICDEBUG_TRACE
 	std::cout<<"iCProcess::gen_code " << name << "...";
 	std::cout.flush();
@@ -117,9 +117,8 @@ iCProcess::iCProcess( const std::string& name, const ParserContext& context ) :	
 //=================================================================================================
 void iCProcess::add_states( const iCStateList& states )
 {
-	printf("iCProcess %s entered add_states\n", this->name.c_str());
 	this->states = states;
-	printf("iCProcess states size argument=%d, this->states size=%d\n", states.size(), this->states.size());
+	//printf("iCProcess.add_states: argument states size=%d, this->states size=%d\n", states.size(), this->states.size());
 	if(isr_driven)
 	{
 		//pass isr_driven to states

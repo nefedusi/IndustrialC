@@ -9,7 +9,7 @@
 //=================================================================================================
 void iCState::gen_code(CodeGenContext& context)
 {
-	std::cout << "iCState::gen_code " << name << std::endl;
+	//std::cout << "iCState::gen_code " << name << std::endl;
 #ifdef ICDEBUG_TRACE
 	std::cout<<"iCState::gen_code " << name << "...";
 	std::cout.flush();
@@ -141,7 +141,7 @@ iCState::iCState( const std::string& name, const ParserContext& context )
 //=================================================================================================
 iCState::~iCState()
 {
-	std::cout << "iCState destructor "<<this->name<<", address: "<< this << std::endl;
+	//std::cout << "iCState destructor "<<this->name<<", address: "<< this << std::endl;
 	for(iCBlockItemsList::iterator i=block_items.begin();i!=block_items.end();i++)
 		delete *i;
 	if(NULL != timeout)

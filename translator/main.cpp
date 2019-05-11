@@ -82,27 +82,11 @@ int main(int argc, char **argv)
 		output_file.open(output_filename.c_str());
 		CodeGenContext context(output_file, ic_program->get_hps());
 		std::cout<<"generating code..."<<std::endl;
-		if (ic_program == NULL)
-		{
-			std::cout << "main: ic_program is null" << std::endl;
-		} else
-		{
-			std::cout << "main: ic_program is not null" << std::endl;
-		}
-		if (context.hps == NULL)
-		{
-			std::cout << "main: context.hps is null" << std::endl;
-		} else
-		{
-			std::cout << "main: context.hps is not null" << std::endl;
-		}
 		ic_program->gen_code(context);
 		output_file.close();
 	}
 
-	std::cout << "main: before deleting ic_program" << std::endl;
 	delete ic_program;
-	std::cout << "main: before deleting parser_context" << std::endl;
 	delete parser_context;
 
 	std::cout<<"translator finished"<<std::endl;
