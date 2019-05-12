@@ -9,8 +9,10 @@ unsigned long iCScope::current_id;
 //=================================================================================================
 iCScope::~iCScope()
 {
+	std::cout << "iCScope: entered destructor, name=" << name << std::endl;
 	if(NULL == prev_scope)
 		delete_scope_tree(this);
+	std::cout << "iCScope: destructor ended, name=" << name << std::endl;
 }
 
 //=================================================================================================

@@ -203,6 +203,7 @@ iCProgram::~iCProgram()
 	//clear functions
 	for (std::list<iCFunction*>::iterator i=func_list.begin(); i!=func_list.end(); i++)
 		delete *i;
+	std::cout << "iCProgram: ended destructor" << std::endl;
 }
 
 void iCProgram::add_proctype(iCProcType* proctype)

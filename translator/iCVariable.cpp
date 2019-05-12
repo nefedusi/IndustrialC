@@ -2,6 +2,7 @@
 #include "iCScope.h"
 #include "CodeGenContext.h"
 #include "iCInitializer.h"
+#include <memory>
 
 //=================================================================================================
 //
@@ -12,9 +13,9 @@ iCVariable::iCVariable( const std::string& name,
 	:	name(name),
 		scope(scope),
 		iCNode(context),
-		used_in_isr(false),
-		decl_initializer(NULL)
+		used_in_isr(false)
 {
+	decl_initializer.reset();
 	full_name = scope->name + "_" + name;
 }
 
@@ -36,16 +37,16 @@ void iCVariable::gen_code( CodeGenContext& context )
 
 	context.to_code_fmt(full_name.c_str());
 
-	for(std::vector<iCExpression*>::iterator i=array_dimensions.begin();i!=array_dimensions.end();i++)
+	for(std::vector<std::shared_ptr<iCExpression>>::iterator i=array_dimensions.begin();i!=array_dimensions.end();i++)
 	{
-		iCExpression* dimension = *i;
+		std::shared_ptr<iCExpression> dimension = *i;
 		context.to_code("[");
-		if(NULL != dimension)
+		if(nullptr != dimension)
 			dimension->gen_code(context);
 		context.to_code("]");
 	}
 
-	if(NULL != decl_initializer)
+	if(nullptr != decl_initializer)
 	{
 		context.to_code(" = ");
 		decl_initializer->gen_code(context);
@@ -63,15 +64,7 @@ void iCVariable::gen_code( CodeGenContext& context )
 //=================================================================================================
 iCVariable::~iCVariable()
 {
-	if(NULL != decl_initializer)
-		delete decl_initializer;
-
-	for(std::vector<iCExpression*>::iterator i=array_dimensions.begin();i!=array_dimensions.end();i++)
-	{
-		iCExpression* dimension = *i;
-		if(NULL != dimension)
-			delete dimension;
-	}
+	std::cout << "iCVariable: destructor ended, full_name=" << full_name << std::endl;
 }
 
 //=================================================================================================

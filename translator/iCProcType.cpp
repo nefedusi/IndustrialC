@@ -1,7 +1,7 @@
 #include "iCProcType.h"
 #include "CodeGenContext.h"
 #include "ParserContext.h"
-#include "iCState.h"
+//#include "iCState.h"
 
 iCProcType::iCProcType(const std::string& name, const ParserContext& context) : iCNode(context)
 {

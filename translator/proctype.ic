@@ -4,15 +4,18 @@
 
 myproctype proc1 (); //OK
 proctype myproctype () {
-	int a;
+	int a=1;
 	state FS_START
 	{
-		//int b;
+		//int d=3;
+		//a + c;
 	}
+	//int b[3] = { 1,2,3 };
 	state AnotherState
 	{
 
 	}
+	int c = a+2;
 }
 myproctype proc2();
 //myproctype proc1(); //duplicate proc instance
@@ -42,12 +45,19 @@ anotherproctype aproc2();*/
 
 process Init : background
 {
-	int a;
+	//int a=1;
 	state FS_START
 	{
-		//int initvar;
+		//int d = a + 3;
+		//a + c;
 		restart;
 	}
+	//int b[3];
+	state AnotherState
+	{
+
+	}
+	//int c = a+2;
 	//int initaftervar;
 }
 

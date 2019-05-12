@@ -58,6 +58,7 @@ public:
 	void set_state(iCState* state) {this->state = state;}
 	
 	const iCProgram* get_program() const {ICASSERT(NULL != program); return program;}
+	//const iCProcType* get_proctype() const { return proctype; }
 	iCProcType* modify_proctype() const { return proctype; }
 	const iCProcess* get_process() const {/*ICASSERT(NULL != process);*/ return process;}//removed assert because vars in functions are used outside processes
 	iCProcess* modify_process() {return process;}

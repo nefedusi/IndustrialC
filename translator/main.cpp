@@ -87,6 +87,7 @@ int main(int argc, char **argv)
 	}
 
 	delete ic_program;
+	std::cout << "main: before deleting parser_context" << std::endl;
 	delete parser_context;
 
 	std::cout<<"translator finished"<<std::endl;

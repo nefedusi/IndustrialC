@@ -64,11 +64,11 @@ void iCFunction::gen_code( CodeGenContext& context )
 			context.to_code_fmt("%s ", (*j).c_str());
 		}
 		context.to_code_fmt(var->full_name.c_str());
-		for(std::vector<iCExpression*>::iterator j=var->array_dimensions.begin();j!=var->array_dimensions.end();j++)
+		for(std::vector<std::shared_ptr<iCExpression>>::iterator j=var->array_dimensions.begin();j!=var->array_dimensions.end();j++)
 		{
-			iCExpression* dimension = *j;
+			std::shared_ptr<iCExpression> dimension = *j;
 			context.to_code("[");
-			if(NULL != dimension)
+			if(nullptr != dimension)
 				dimension->gen_code(context);
 			context.to_code("]");
 		}

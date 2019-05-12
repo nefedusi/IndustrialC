@@ -28,6 +28,7 @@ ParserContext::ParserContext()
 //=================================================================================================
 ParserContext::~ParserContext()
 {
+	std::cout << "ParserContext entered destructor" << std::endl;
 	delete root_scope; //the scope tree recursively deletes itself (see iCScope destructor)
 }
 
@@ -58,6 +59,7 @@ void ParserContext::close_scope()
 //=================================================================================================
 void ParserContext::add_var_to_scope(iCVariable* decl)
 {
+	std::cout << "ParserContext.add_var_to_scope: scopename=" << current_scope->name << std::endl;
 	current_scope->vars.push_back(decl);
 }
 
