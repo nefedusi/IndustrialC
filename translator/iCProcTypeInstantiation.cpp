@@ -41,11 +41,12 @@ void iCProcTypeInstantiation::gen_code(CodeGenContext& context)
 	iCVariablesList var_list = proctype->get_variables();
 	for (iCVariablesList::iterator i = var_list.begin(); i != var_list.end(); i++)
 	{
-		iCVariable *var = new iCVariable(**i);
-		var->full_name = name + "_" + (*i)->name;
+		iCVariable *var = *i;
+		var->full_name = name + "_" + (*i)->name; //todo: changing field of var for every instance is not ok
 		std::cout << "iCProcTypeInstantiation: instance var full_name=" << var->full_name << std::endl;
 
 		context.disable_indentation();
+		std::cout << "indentation disabled" << std::endl;
 		var->gen_code(context);
 		context.enable_indentation();
 		context.to_code("");

@@ -8,18 +8,18 @@ proctype myproctype () {
 	state FS_START
 	{
 		int d = 1;
-	int e = d+2;
+		//int e = d+2;
 		/*int e = a;
 		int f = d+2;
 		int g = d + a;
 		int h = b;*/
 	}
-	int b = a+1;
+	int b[3] = { 1,2,3 };
 	state AnotherState
 	{
 
 	}
-	int c = a+b;
+	//int c = a+b;
 }
 myproctype proc2();
 //myproctype proc1(); //duplicate proc instance

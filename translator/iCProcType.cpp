@@ -12,6 +12,9 @@ iCProcType::iCProcType(const std::string& name, const ParserContext& context) : 
 
 iCProcType::~iCProcType()
 {
+	for (iCVariablesList::iterator i = var_list.begin(); i != var_list.end(); i++)
+		delete *i;
+
 	for (iCStateList::iterator i = states.begin(); i != states.end(); i++)
 		delete *i;
 }
