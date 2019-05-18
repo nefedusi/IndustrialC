@@ -13,7 +13,7 @@ public:
 	std::string name;
 	const iCScope* scope;
 	iCIdentifier(const std::string& name, const iCScope* scope, const ParserContext& context);
-	virtual ~iCIdentifier();
+	//virtual ~iCIdentifier();
 	virtual void gen_code(CodeGenContext& context);
 	const std::string get_scoped_name();
 };

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common.h"
-#include <memory>
 
 class iCVariable;
 class CodeGenContext;
@@ -47,7 +46,7 @@ public:
 class iCBlockItem : public virtual iCNode {};
 class iCProgramItem {};
 class iCProgramItemsList {};
-class iCExpression : public virtual iCNode  {};
+class iCExpression : public virtual iCNode {};
 class iCDeclaration : public iCBlockItem, public iCProgramItem, public iCStatement {};
 class iCHyperprocess;
 class iCProcType;
@@ -62,6 +61,6 @@ typedef std::list<std::string> iCStringList;
 typedef std::map<std::string, iCHyperprocess*> iCHyperprocessMap;
 typedef std::map<std::string, iCProcType*> iCProctypeMap;
 typedef std::map<std::string, iCProcess*> iCProcessMap;
-typedef std::vector<std::shared_ptr<iCState>> iCStateList;
+typedef std::vector<iCState*> iCStateList;
 typedef std::list<iCVariable*> iCVariablesList;
 typedef std::vector<iCIdentifier*> iCIdentifierList;

@@ -172,6 +172,10 @@ void iCProgram::gen_code(CodeGenContext& context)
 	//code for background processes
 	hps["background"]->gen_code(context);
 
+	/*//parameterized processes
+	for (std::list<iCProcTypeInstantiation*>::iterator i = instantiations.begin(); i != instantiations.end(); i++)
+		(*i)->gen_code(context);*/
+
 	//program footer
 	context.indent_depth--;
 	context.indent(); context.to_code_fmt("} //while loop\n");

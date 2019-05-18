@@ -5,6 +5,7 @@
 	#include "ParserContext.h"
 	#include "iCIdentifier.h"
 	#include "iCMCUIdentifier.h"
+	#include "iCIdentifierInProcType.h"
 	#include "iCProcType.h"
 	#include "iCProcTypeInstantiation.h"
 	#include "iCProcess.h"
@@ -49,7 +50,6 @@
 	#include <stdarg.h> 
 	#include <typeinfo>
 	#include <set>
-	#include <memory>
 	
     iCProgram* ic_program = NULL; /* AST root */
 	extern ParserContext* parser_context;
@@ -82,7 +82,7 @@
 	std::string *string;
 	iCStringList *str_list;
 	int token;
-	std::list<iCVariable*>* var_list;
+	iCVariablesList* var_list;
 	iCHyperprocess* hyperprocess;
 	iCDeclarationList* decl_list;
 	iCProcessMap* proc_map;
@@ -359,7 +359,7 @@ program_item	:	var_declaration	//global var declarations
 						//split the declaration into separate variables and feed them to the program
 						//the variables are global, var_declaration is a simple list of iCVariable
 						//no iCVaribleDeclaration objects are built or used here
-						for(std::list<iCVariable*>::iterator i=$1->begin();i!=$1->end();i++)
+						for(iCVariablesList::iterator i=$1->begin();i!=$1->end();i++)
 							ic_program->add_variable(*i);
 						delete $1;
 						$$ = NULL;
@@ -458,7 +458,7 @@ proctype_def : TPROCTYPE TIDENTIFIER // 1 2
 				{
 					printf("parser: entered proctype_def rule\n");
 					//check for proctype redefinition
-					if (ic_program->proctype_defined(*$2))
+					if (ic_program->proctype_defined(*$2)) //todo: replace with parser_context->get_proctype_scope ?
 						parser_context->err_msg("process type redefinition: %s already defined", $2->c_str());
 
 					$<proctype>$ = new iCProcType(*$2, *parser_context);
@@ -499,14 +499,8 @@ proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
 									$2->c_str(), scope->name.empty() ? "this scope" : scope->name.c_str());
 							}
 
-							//Create the iCProcess objects (w/o states or activator)
-							iCProcess* process = new iCProcess(*$2, *parser_context);
-							process->set_hp("background");
-							//printf("proc %s hyperprocess: %s\n", process->name.c_str(), process->activator.c_str());
-							parser_context->add_proc_to_scope(process->name);
-
-							$$ = new iCProcTypeInstantiation(ic_program, *$1, process);
-							parser_context->add_to_second_pass($$);
+							$$ = new iCProcTypeInstantiation(ic_program, *$1, *$2);
+							ic_program->add_proctype_instantiation($$);
 
 							delete $1;
 							delete $2;
@@ -580,14 +574,14 @@ proc_def	:	TPROC TIDENTIFIER // 1 2
 proc_body	: proc_body state 
 			{
 				//states are stored in the list
-				$1->push_back(std::shared_ptr<iCState>($2));
+				$1->push_back($2);
 				$$ = $1;
 			}
 			| proc_body var_declaration 
 			{
 				//Split the declaration into variables and feed them to the program
-				std::list<iCVariable*>* vars = $2;
-				for(std::list<iCVariable*>::iterator i=vars->begin();i!=vars->end();i++)
+				iCVariablesList* vars = $2;
+				for(iCVariablesList::iterator i=vars->begin();i!=vars->end();i++)
 					ic_program->add_variable(*i);
 
 				delete vars;
@@ -596,13 +590,13 @@ proc_body	: proc_body state
 			| state 
 			{
 				$$ = new iCStateList();
-				$$->push_back(std::shared_ptr<iCState>($1));
+				$$->push_back($1);
 			}
 			| var_declaration 
 			{
 				//Split the declaration into variables and feed them to the program
-				std::list<iCVariable*>* vars = $1;
-				for(std::list<iCVariable*>::iterator i=vars->begin();i!=vars->end();i++)
+				iCVariablesList* vars = $1;
+				for(iCVariablesList::iterator i=vars->begin();i!=vars->end();i++)
 					ic_program->add_variable(*i);
 				
 				delete vars;
@@ -1046,9 +1040,7 @@ primary_expr : TTRUE   {$$ = new iCLogicConst(true, *parser_context); $1;}
 						}
 						else
 						{
-							$$ = new iCIdentifier(*$1, var->scope, *parser_context);
 							const iCProcess* proc = parser_context->get_process();
-
 							if(NULL != proc)//added because of functions - vars in functions don't belong to any proc
 							{
 								if(0 != proc->activator.compare("background"))
@@ -1056,6 +1048,20 @@ primary_expr : TTRUE   {$$ = new iCLogicConst(true, *parser_context); $1;}
 									//Mark var as used in ISR - used for volatile checks
 									var->used_in_isr = true;
 									parser_context->add_to_second_pass(var);
+								}
+								$$ = new iCIdentifier(*$1, var->scope, *parser_context);
+							}
+							else
+							{
+								const iCProcType* proctype = parser_context->get_proctype();
+								if (NULL != proctype) //var belongs to a proctype
+								{
+									$$ = new iCIdentifierInProcType(*$1, var->scope, *parser_context);
+									//$$ = new iCIdentifier(*$1, var->scope, *parser_context);
+								}
+								else
+								{
+									$$ = new iCIdentifier(*$1, var->scope, *parser_context);
 								}
 							}
 						}

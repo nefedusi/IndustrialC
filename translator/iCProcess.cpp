@@ -1,4 +1,3 @@
-#include <memory>
 #include "iCProcess.h"
 #include "CodeGenContext.h"
 #include "ParserContext.h"
@@ -87,6 +86,15 @@ void iCProcess::gen_timeout_code( CodeGenContext& context )
 }
 
 //=================================================================================================
+//
+//=================================================================================================
+iCProcess::~iCProcess()
+{
+	for (iCStateList::iterator i = states.begin(); i != states.end(); i++)
+		delete *i;
+}
+
+//=================================================================================================
 //Check process has a state by this name
 //=================================================================================================
 bool iCProcess::has_state( const std::string& state_name ) const
@@ -125,7 +133,7 @@ void iCProcess::add_states( const iCStateList& states )
 		//pass isr_driven to states
 		for(iCStateList::iterator i=this->states.begin(); i!=this->states.end(); i++)
 		{
-			std::shared_ptr<iCState> state = *i;
+			iCState* state = *i;
 			state->set_isr_driven();
 			if(state->has_timeout())
 				_has_timeouts = true;

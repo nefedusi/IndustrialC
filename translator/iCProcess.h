@@ -24,6 +24,7 @@ public:
 	const iCState* stop_state; //does not own
 	
 	iCProcess(const std::string& name, const ParserContext& context);
+	virtual ~iCProcess();
 
 	void set_hp(const std::string& hp_name) 
 	{

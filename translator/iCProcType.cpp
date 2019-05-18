@@ -10,6 +10,12 @@ iCProcType::iCProcType(const std::string& name, const ParserContext& context) : 
     this->name = name;
 }
 
+iCProcType::~iCProcType()
+{
+	for (iCStateList::iterator i = states.begin(); i != states.end(); i++)
+		delete *i;
+}
+
 void iCProcType::add_states(const iCStateList& states)
 {
 	this->states = states;
