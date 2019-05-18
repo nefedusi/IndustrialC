@@ -188,7 +188,7 @@ void iCProgram::gen_code(CodeGenContext& context)
 //=================================================================================================
 iCProgram::~iCProgram()
 {
-	std::cout << "iCProgram descructor called" << std::endl;
+	std::cout << "iCProgram destructor called" << std::endl;
 
 	//clear the hyperprocesses
 	for (iCHyperprocessMap::iterator i=hps.begin(); i!=hps.end(); i++)

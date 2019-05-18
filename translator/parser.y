@@ -582,8 +582,20 @@ proc_body	: proc_body state
 			{
 				//Split the declaration into variables and feed them to the program
 				iCVariablesList* vars = $2;
-				for(iCVariablesList::iterator i=vars->begin();i!=vars->end();i++)
-					ic_program->add_variable(*i);
+
+				iCProcType* proctype = parser_context->modify_proctype();
+				if (NULL == proctype) //proc_body belongs to non-parameterized process
+				{
+					std::cout << "parser.body+var_decl branch: proc_body belongs to non-parameterized process" << std::endl;
+					for (iCVariablesList::iterator i = vars->begin(); i != vars->end(); i++)
+						ic_program->add_variable(*i);
+				}
+				else //proc_body belongs to proctype
+				{
+					std::cout << "parser.body+var_decl branch: proc_body belongs to proctype, proctype_name=" << proctype->name << std::endl;
+					for (iCVariablesList::iterator i = vars->begin(); i != vars->end(); i++)
+						proctype->add_variable(*i);
+				}
 
 				delete vars;
 				$$ = $1;
@@ -597,8 +609,20 @@ proc_body	: proc_body state
 			{
 				//Split the declaration into variables and feed them to the program
 				iCVariablesList* vars = $1;
-				for(iCVariablesList::iterator i=vars->begin();i!=vars->end();i++)
-					ic_program->add_variable(*i);
+
+				iCProcType* proctype = parser_context->modify_proctype();
+				if (NULL == proctype) //proc_body belongs to non-parameterized process
+				{
+					std::cout << "parser.var_decl branch: proc_body belongs to non-parameterized process" << std::endl;
+					for (iCVariablesList::iterator i = vars->begin(); i != vars->end(); i++)
+						ic_program->add_variable(*i);
+				}
+				else //proc_body belongs to proctype
+				{
+					std::cout << "parser.var_decl branch: proc_body belongs to proctype, proctype_name=" << proctype->name << std::endl;
+					for (iCVariablesList::iterator i = vars->begin(); i != vars->end(); i++)
+						proctype->add_variable(*i);
+				}
 				
 				delete vars;
 				$$ = new iCStateList();
@@ -689,7 +713,7 @@ block_item	:	var_declaration
 					ICASSERT(NULL != parser_context->get_func() || NULL != parser_context->get_state());
 
 					//Build an iCVariableDeclaration object and pass it further
-					std::list<iCVariable*>* vars = $1;
+					iCVariablesList* vars = $1;
 					iCVariableDeclaration* decl = new iCVariableDeclaration(*parser_context);
 					decl->set_vars(*vars);
 					$$ = decl;
@@ -1291,7 +1315,7 @@ param_list				: param_list TCOMMA param_declarator
 						  }
 						| param_declarator 
 						{
-							$$ = new std::list<iCVariable*>;
+							$$ = new iCVariablesList;
 							$$->push_back($1);
 						}
 						;
@@ -1310,7 +1334,7 @@ param_declarator		: decl_specs direct_declarator
 var_declaration			:	decl_specs init_declarator_list TSEMIC 
 							{
 								$$ = $2;
-								for(std::list<iCVariable*>::iterator i=$2->begin();i!=$2->end();i++)
+								for(iCVariablesList::iterator i=$2->begin();i!=$2->end();i++)
 								{
 									iCVariable* var = *i;
 									var->set_type_specs(*$1);
@@ -1332,7 +1356,7 @@ init_declarator_list	:	init_declarator_list TCOMMA init_declarator
 							}
 						|	init_declarator 
 							{
-								$$ = new std::list<iCVariable*>;
+								$$ = new iCVariablesList;
 								$$->push_back($1);
 							}
 						;

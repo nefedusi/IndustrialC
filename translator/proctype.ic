@@ -4,14 +4,22 @@
 
 myproctype proc1 (); //OK
 proctype myproctype () {
+	int a=1;
 	state FS_START
 	{
-
+		int d = 1;
+	int e = d+2;
+		/*int e = a;
+		int f = d+2;
+		int g = d + a;
+		int h = b;*/
 	}
+	int b = a+1;
 	state AnotherState
 	{
 
 	}
+	int c = a+b;
 }
 myproctype proc2();
 //myproctype proc1(); //duplicate proc instance
@@ -45,6 +53,7 @@ process Init : background
 	state FS_START
 	{
 		int c = a + 3; //b can't be used here, it's still undeclaered
+		int d = c + 4;
 		restart;
 	}
 	int b=2;

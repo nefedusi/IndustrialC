@@ -44,7 +44,11 @@ void iCProcTypeInstantiation::gen_code(CodeGenContext& context)
 		iCVariable *var = new iCVariable(**i);
 		var->full_name = name + "_" + (*i)->name;
 		std::cout << "iCProcTypeInstantiation: instance var full_name=" << var->full_name << std::endl;
+
+		context.disable_indentation();
 		var->gen_code(context);
+		context.enable_indentation();
+		context.to_code("");
 	}
 
 	//update context
