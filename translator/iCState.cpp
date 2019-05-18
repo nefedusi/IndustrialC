@@ -15,7 +15,9 @@ void iCState::gen_code(CodeGenContext& context)
 	std::cout.flush();
 #endif
 
+	std::cout << "context.process=" << context.process << std::endl;
 	std::string state_name = special ? name : (context.process->name + name);
+	std::cout << "state_name=" << state_name << std::endl;
 
 	//update context
 	context.state = this;
@@ -34,6 +36,7 @@ void iCState::gen_code(CodeGenContext& context)
 		if(NULL != *i)
 			(*i)->gen_code(context);
 	}
+	std::cout << "iCState after block_items gen_code" << std::endl;
 
 	//timeout statement
 	//background-run states check & execute their timeout themselves

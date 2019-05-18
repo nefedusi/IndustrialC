@@ -14,7 +14,7 @@ class iCProcTypeInstantiation: public iCProcess
 public:
 	iCProcTypeInstantiation(iCProgram* program, const std::string& proctype_name, const std::string& instance_name, 
 		const ParserContext& context);
-	virtual ~iCProcTypeInstantiation() {}
+	virtual ~iCProcTypeInstantiation() { std::cout << "iCProcTypeInstantiation " << name << " destructor called" << std::endl; }
 	void second_pass();
 	void gen_code(CodeGenContext& context); //todo: remove from iCNode?
 };

@@ -1,4 +1,5 @@
 #include "iCProcTypeInstantiation.h"
+#include "CodeGenContext.h"
 #include "iCProgram.h"
 #include "iCProcType.h"
 #include "iCProcess.h"
@@ -35,7 +36,7 @@ void iCProcTypeInstantiation::second_pass()
 
 void iCProcTypeInstantiation::gen_code(CodeGenContext& context)
 {
-	std::cout << "iCProcTypeInstantiation.gen_code called" << std::endl;
+	std::cout << "iCProcTypeInstantiation.gen_code called for " << name << std::endl;
 
 	iCVariablesList var_list = proctype->get_variables();
 	for (iCVariablesList::iterator i = var_list.begin(); i != var_list.end(); i++)
@@ -46,7 +47,33 @@ void iCProcTypeInstantiation::gen_code(CodeGenContext& context)
 		var->gen_code(context);
 	}
 
+	//update context
+	context.process = this;
+
+	//Add comments
+	context.to_code_fmt("%s\n", C_COMMENT_FRAME);
+	context.to_code_fmt("//Process: %s\n", name.c_str());
+	context.to_code_fmt("%s\n", C_COMMENT_FRAME);
+	context.set_location(line_num, filename);
+
+	//Process header
+	context.indent();
+	context.to_code_fmt("switch(%s[%s].%s)\n", C_PROC_ARRAY_NAME, name.c_str(), C_STATE_FUNC_ATTR_NAME);
+	context.indent();
+	context.to_code_fmt("{\n");
+	context.indent_depth++;
+
 	iCStateList state_list = proctype->get_states();
 	for (iCStateList::iterator i = state_list.begin(); i != state_list.end(); i++)
 		(*i)->gen_code(context);
+
+	//process footer
+	context.indent_depth--;
+	context.indent();
+	context.to_code_fmt("}  //process %s\n\n", name.c_str());
+
+	//update context
+	context.process = NULL;
+
+	std::cout << "iCProcTypeInstantiation.gen_code ended for " << name << std::endl;
 }
