@@ -5,7 +5,11 @@ class iCIdentifierInProcType : public iCIdentifier
 {
 public:
 	iCIdentifierInProcType(const std::string& name, const iCScope* scope, const ParserContext& context)
-		 : iCIdentifier(name, scope, context) {}
-	//virtual ~iCIdentifierInProcType();
-	virtual void gen_code(CodeGenContext& context);
+		: iCIdentifier(name, scope, context),
+		  iCNode(context) {}
+	//virtual ~iCIdentifierInProcType() {}
+	virtual void gen_code(CodeGenContext& context)
+	{
+		std::cout << "iCIdentifierInProcType.gen_code called" << std::endl;
+	}
 };

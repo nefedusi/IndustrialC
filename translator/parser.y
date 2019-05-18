@@ -1054,8 +1054,8 @@ primary_expr : TTRUE   {$$ = new iCLogicConst(true, *parser_context); $1;}
 								const iCProcType* proctype = parser_context->get_proctype();
 								if (NULL != proctype) //var belongs to a proctype
 								{
-									//$$ = new iCIdentifierInProcType(*$1, var->scope, *parser_context);
-									$$ = new iCIdentifier(*$1, var->scope, *parser_context);
+									$$ = new iCIdentifierInProcType(*$1, var->scope, *parser_context);
+									//$$ = new iCIdentifier(*$1, var->scope, *parser_context);
 								}
 								else
 								{
