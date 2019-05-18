@@ -45,7 +45,7 @@ public:
 	//the vars should be made local or global 
 	bool in_function()const{return NULL != func;}
 	void set_func(iCFunction* func) {this->func = func;}
-	iCFunction*  get_func() {return func;}
+	iCFunction* get_func() {return func;}
 
 	std::set<iCNode*> second_pass_nodes; //does not own
 
@@ -99,6 +99,7 @@ public:
 	const iCScope* get_func_scope(const std::string& func)const;
 	const iCScope* get_state_scope(const std::string& name)const;
 	const iCScope* get_proc_scope(const std::string& name)const;
+	const iCScope* get_proctype_scope(const std::string& name) const;
 	const iCScope* get_current_scope()const{return current_scope;}
 
 	iCVariable* get_var(const std::string& identifier)const;

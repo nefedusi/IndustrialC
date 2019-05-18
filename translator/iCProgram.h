@@ -23,7 +23,7 @@ class iCProgram : public iCNode
 	std::list<iCProcTypeInstantiation*> instantiations; //instantiations (just for memory control)
 	iCDeclarationList mcu_decls;//vector/register/bit name definitions
 	iCProcessMap procs; // does not own, auxiliary list for quick checks
-	std::list<iCVariable*> var_list;//list of defined variables
+	iCVariablesList var_list;//list of defined variables
 	std::list<iCFunction*> func_list;//list of defined functions
 
 public:

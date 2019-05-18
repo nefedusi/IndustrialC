@@ -12,9 +12,8 @@ iCProcType::iCProcType(const std::string& name, const ParserContext& context) : 
 
 void iCProcType::add_states(const iCStateList& states)
 {
-	printf("iCProcType %s entered add_states\n", this->name.c_str());
 	this->states = states;
-	printf("iCProcType states size argument=%d, this->states size=%d\n", states.size(), this->states.size());
+	printf("iCProcType.add_states: argument states size=%d, this->states size=%d\n", states.size(), this->states.size());
 	//todo: if (isr_driven) ? (see iCProcess)
 }
 

@@ -35,7 +35,7 @@ void iCProgram::gen_code(CodeGenContext& context)
 		(*i)->gen_code(context);
 
 	//variable declarations
-	for(std::list<iCVariable*>::iterator i=var_list.begin();i!=var_list.end();i++)
+	for(iCVariablesList::iterator i=var_list.begin();i!=var_list.end();i++)
 		(*i)->gen_code(context);
 
 	//function definitions
@@ -205,8 +205,10 @@ iCProgram::~iCProgram()
 		delete *i;
 
 	//clear variables
-	for (std::list<iCVariable*>::iterator i=var_list.begin(); i!=var_list.end(); i++)
+	for (iCVariablesList::iterator i=var_list.begin(); i!=var_list.end(); i++)
 		delete *i;
+
+	std::cout << "iCProgram: ended destructor" << std::endl;
 }
 
 void iCProgram::add_proctype(iCProcType* proctype)

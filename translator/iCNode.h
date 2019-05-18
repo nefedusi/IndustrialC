@@ -3,6 +3,7 @@
 #include "common.h"
 #include <memory>
 
+class iCVariable;
 class CodeGenContext;
 class ParserContext;
 
@@ -62,4 +63,5 @@ typedef std::map<std::string, iCHyperprocess*> iCHyperprocessMap;
 typedef std::map<std::string, iCProcType*> iCProctypeMap;
 typedef std::map<std::string, iCProcess*> iCProcessMap;
 typedef std::vector<std::shared_ptr<iCState>> iCStateList;
+typedef std::list<iCVariable*> iCVariablesList;
 typedef std::vector<iCIdentifier*> iCIdentifierList;
