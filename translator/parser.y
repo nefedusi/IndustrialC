@@ -4,6 +4,7 @@
 	#include "iCScope.h" 
 	#include "ParserContext.h"
 	#include "iCIdentifier.h"
+	#include "iCIdentifierInProcType.h"
 	#include "iCMCUIdentifier.h"
 	#include "iCProcType.h"
 	#include "iCProcTypeInstantiation.h"
@@ -500,15 +501,7 @@ proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
 									$2->c_str(), scope->name.empty() ? "this scope" : scope->name.c_str());
 							}
 
-							//Create the iCProcess objects (w/o states or activator)
-							iCProcess* process = new iCProcess(*$2, *parser_context);
-							process->set_hp("background");
-							//printf("proc %s hyperprocess: %s\n", process->name.c_str(), process->activator.c_str());
-							parser_context->add_proc_to_scope(process->name);
-
-							$$ = new iCProcTypeInstantiation(ic_program, *$1, process);
-							parser_context->add_to_second_pass($$);
-
+							$$ = new iCProcTypeInstantiation(ic_program, *$1, *$2);
 							delete $1;
 							delete $2;
 							$3; $4; $5;
@@ -1076,8 +1069,7 @@ primary_expr : TTRUE   {$$ = new iCLogicConst(true, *parser_context); $1;}
 						else
 						{
 							std::cout << "parser primary_expr: meet declared var'"<<var->name<<"' at line "<<parser_context->line() << std::endl;
-							iCIdentifier* id = new iCIdentifier(*$1, var->scope, *parser_context);
-							$$ = id;
+							iCIdentifier *id;
 
 							const iCProcess* proc = parser_context->get_process();
 							if (NULL != proc)
@@ -1088,15 +1080,22 @@ primary_expr : TTRUE   {$$ = new iCLogicConst(true, *parser_context); $1;}
 									var->used_in_isr = true;
 									parser_context->add_to_second_pass(var);
 								}
+								id = new iCIdentifier(*$1, var->scope, *parser_context);
 							}
 							else //var belongs to a function or a proctype
 							{
 								iCProcType* proctype = parser_context->modify_proctype();
-								if (NULL != proctype)
+								if (NULL != proctype) //var belongs to a proctype
 								{
-									proctype->add_identifier(id);
+									iCIdentifier* id = new iCIdentifierInProcType(*$1, var->scope, *parser_context);
+								}
+								else
+								{
+									id = new iCIdentifier(*$1, var->scope, *parser_context);
 								}
 							}
+
+							$$ = id;
 						}
 					}
 					delete $1;
