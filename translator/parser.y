@@ -498,9 +498,7 @@ proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
 								parser_context->err_msg("process redefinition: %s already defined in %s",
 									$2->c_str(), scope->name.empty() ? "this scope" : scope->name.c_str());
 							}
-
 							$$ = new iCProcTypeInstantiation(ic_program, *$1, *$2);
-							ic_program->add_proctype_instantiation($$);
 
 							delete $1;
 							delete $2;
@@ -1056,8 +1054,8 @@ primary_expr : TTRUE   {$$ = new iCLogicConst(true, *parser_context); $1;}
 								const iCProcType* proctype = parser_context->get_proctype();
 								if (NULL != proctype) //var belongs to a proctype
 								{
-									$$ = new iCIdentifierInProcType(*$1, var->scope, *parser_context);
-									//$$ = new iCIdentifier(*$1, var->scope, *parser_context);
+									//$$ = new iCIdentifierInProcType(*$1, var->scope, *parser_context);
+									$$ = new iCIdentifier(*$1, var->scope, *parser_context);
 								}
 								else
 								{

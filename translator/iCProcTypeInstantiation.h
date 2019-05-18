@@ -5,7 +5,6 @@
 class iCProgram;
 class iCProcess;
 class CodeGenContext;
-#include "CodeGenContext.h"
 
 class iCProcTypeInstantiation: public iCNode
 {
@@ -15,5 +14,4 @@ class iCProcTypeInstantiation: public iCNode
 public:
 	iCProcTypeInstantiation(iCProgram* program, const std::string& proctype_name, const std::string& instance_name);
 	void gen_code(CodeGenContext& context); //remove from iCNode?
-	void second_pass();
 };
