@@ -4,14 +4,18 @@
 
 myproctype proc1 (); //OK
 proctype myproctype () {
+	int a=1;
 	state FS_START
 	{
-
+		//int d=3;
+		//a + c;
 	}
+	//int b[3] = { 1,2,3 };
 	state AnotherState
 	{
 
 	}
+	int c = a+2;
 }
 myproctype proc2();
 //myproctype proc1(); //duplicate proc instance
@@ -25,7 +29,7 @@ myproctype proc2();
 	}
 }*/
 
-proctype anotherproctype()
+/*proctype anotherproctype()
 {
 	state FS_START
 	{
@@ -37,14 +41,24 @@ proctype anotherproctype()
 	}
 }
 anotherproctype aproc1();
-anotherproctype aproc2();
+anotherproctype aproc2();*/
 
 process Init : background
 {
+	//int a=1;
 	state FS_START
 	{
+		//int d = a + 3;
+		//a + c;
 		restart;
 	}
+	//int b[3];
+	state AnotherState
+	{
+
+	}
+	//int c = a+2;
+	//int initaftervar;
 }
 
 //myproctype Init(); //duplicate with non-parameterized process

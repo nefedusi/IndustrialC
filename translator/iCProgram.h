@@ -23,7 +23,7 @@ class iCProgram : public iCNode
 	std::list<iCProcTypeInstantiation*> instantiations; //instantiations (just for memory control)
 	iCDeclarationList mcu_decls;//vector/register/bit name definitions
 	iCProcessMap procs; // does not own, auxiliary list for quick checks
-	std::list<iCVariable*> var_list;//list of defined variables
+	iCVariablesList var_list;//list of defined variables
 	std::list<iCFunction*> func_list;//list of defined functions
 
 public:
@@ -34,7 +34,7 @@ public:
 	void add_proctype_instantiation(iCProcTypeInstantiation* instantiation);
 	void add_process(iCProcess* proc);
 	void add_mcu_declaration(iCDeclaration* decl);
-	void add_variable(iCVariable* var) { var_list.push_back(var); }
+	void add_variable(std::shared_ptr<iCVariable> var) { var_list.push_back(var); }
 	void add_function(iCFunction* func);
 	bool hp_defined(const std::string& activator);
 	const iCHyperprocessMap* get_hps() const {return &hps;} 

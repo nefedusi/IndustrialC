@@ -82,7 +82,7 @@
 	std::string *string;
 	iCStringList *str_list;
 	int token;
-	std::list<iCVariable*>* var_list;
+	iCVariablesList* var_list;
 	iCHyperprocess* hyperprocess;
 	iCDeclarationList* decl_list;
 	iCProcessMap* proc_map;
@@ -357,9 +357,9 @@ program_items_list	:	program_items_list program_item { $$ = $1; $2; }
 program_item	:	var_declaration	//global var declarations
 					{
 						//split the declaration into separate variables and feed them to the program
-						//the variables are global, var_declaration is a simple list of iCVariable
+						//the variables are global, var_declaration is a simple list of iCVariable (shared_ptrs)
 						//no iCVaribleDeclaration objects are built or used here
-						for(std::list<iCVariable*>::iterator i=$1->begin();i!=$1->end();i++)
+						for(iCVariablesList::iterator i=$1->begin();i!=$1->end();i++)
 							ic_program->add_variable(*i);
 						delete $1;
 						$$ = NULL;
@@ -456,9 +456,10 @@ hp_definition	:	THYPERPROCESS TIDENTIFIER // 1  2
 //process type definition
 proctype_def : TPROCTYPE TIDENTIFIER // 1 2
 				{
+					//todo: check if one proctype is inside another, check the same on usual processes
 					printf("parser: entered proctype_def rule\n");
 					//check for proctype redefinition
-					if (ic_program->proctype_defined(*$2))
+					if (ic_program->proctype_defined(*$2)) //todo: replace with parser_context->get_proctype_scope ?
 						parser_context->err_msg("process type redefinition: %s already defined", $2->c_str());
 
 					$<proctype>$ = new iCProcType(*$2, *parser_context);
@@ -522,6 +523,7 @@ proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
 //process <proc_name> : <hp_name> { <proc_body> }
 proc_def	:	TPROC TIDENTIFIER // 1 2
 				{
+					printf("parser: entered proc_def rule\n");
 					//check for process redefinition
 					const iCScope* scope = parser_context->get_proc_scope(*$2);
 					if(NULL != scope)
@@ -586,9 +588,20 @@ proc_body	: proc_body state
 			| proc_body var_declaration 
 			{
 				//Split the declaration into variables and feed them to the program
-				std::list<iCVariable*>* vars = $2;
-				for(std::list<iCVariable*>::iterator i=vars->begin();i!=vars->end();i++)
-					ic_program->add_variable(*i);
+				iCVariablesList* vars = $2;
+
+				iCProcType* proctype = parser_context->modify_proctype();
+				if (NULL == proctype) //proc_body belongs to non-parameterized process
+				{
+					std::cout << "parser.body+var_decl branch: proc_body belongs to non-parameterized process" << std::endl;
+					for (iCVariablesList::iterator i = vars->begin(); i != vars->end(); i++)
+						ic_program->add_variable(*i);
+				} else //proc_body belongs to proctype
+				{
+					std::cout << "parser.body+var_decl branch: proc_body belongs to proctype, proctype_name=" << proctype->name << std::endl;
+					for (iCVariablesList::iterator i = vars->begin(); i != vars->end(); i++)
+						proctype->add_variable(*i);
+				}
 
 				delete vars;
 				$$ = $1;
@@ -601,9 +614,21 @@ proc_body	: proc_body state
 			| var_declaration 
 			{
 				//Split the declaration into variables and feed them to the program
-				std::list<iCVariable*>* vars = $1;
-				for(std::list<iCVariable*>::iterator i=vars->begin();i!=vars->end();i++)
-					ic_program->add_variable(*i);
+				iCVariablesList* vars = $1;
+				
+				iCProcType* proctype = parser_context->modify_proctype();
+				if (NULL == proctype) //proc_body belongs to non-parameterized process
+				{
+					std::cout << "parser.var_decl branch: proc_body belongs to non-parameterized process" << std::endl;
+					for (iCVariablesList::iterator i = vars->begin(); i != vars->end(); i++)
+						ic_program->add_variable(*i);
+				}
+				else //proc_body belongs to proctype
+				{
+					std::cout << "parser.var_decl branch: proc_body belongs to proctype, proctype_name=" << proctype->name << std::endl;
+					for (iCVariablesList::iterator i = vars->begin(); i != vars->end(); i++)
+						proctype->add_variable(*i);
+				}
 				
 				delete vars;
 				$$ = new iCStateList();
@@ -679,7 +704,7 @@ state_items_list	:	state_items_list state_block_item //build a list of state_blo
 					|	state_items_list error TSEMIC { yyerrok; $$=$1; $3; }
 					|	error TSEMIC { $$ = new iCBlockItemsList(); yyerrok; $2; }
 					;
-
+//iCBlockItem*
 state_block_item	:	block_item	{$$ = $1;}
 					|	timeout //timeout is treated separately from all the other statements
 						{
@@ -687,14 +712,14 @@ state_block_item	:	block_item	{$$ = $1;}
 							parser_context->modify_state()->set_timeout($1);//a hack to access the state
 						}
 					;
-
+//iCBlockItem*
 block_item	:	var_declaration 
 				{
 					// these are local variables - make sure we are inside a state or a function
 					ICASSERT(NULL != parser_context->get_func() || NULL != parser_context->get_state());
 
 					//Build an iCVariableDeclaration object and pass it further
-					std::list<iCVariable*>* vars = $1;
+					iCVariablesList* vars = $1;
 					iCVariableDeclaration* decl = new iCVariableDeclaration(*parser_context);
 					decl->set_vars(*vars);
 					$$ = decl;
@@ -729,6 +754,7 @@ c_code		:	TCCODELINE
 /*************************************************************************************************/     
 /*                                 S T A T E M E N T S                                           */     
 /*************************************************************************************************/
+//iCStatement*
 statement	:	TSET TSTATE TIDENTIFIER TSEMIC //set state <state_name>;
 				{
 					const iCProcess* proc = parser_context->get_process();
@@ -889,13 +915,14 @@ for_init_statement	:	expression_statement
 							delete $1;
 						}
 					;
-
+//iCStatement*
 expression_statement: expr TSEMIC { $$ = new iCExpressionStatement($1, *parser_context); $2; }
 					| TSEMIC { $$ = new iCExpressionStatement(NULL, *parser_context); $1; }
 
 //compound statement is pair of braces with block items in between. e.g. for or if body can be a compound statement
 //prep_compound rule is used to open a separate scope for the items inside
 //TODO: use midrule action instead of prep_compound, remove prep_compound in the empty case - don't need the scope there.
+//iCStatement*
 compound_statement:		TLBRACE prep_compound block_items_list TRBRACE 
 						{
 							ICASSERT(NULL != $3)
@@ -912,6 +939,7 @@ compound_statement:		TLBRACE prep_compound block_items_list TRBRACE
 							$1;$3;
 						}
 					;
+//iCStatement*
 prep_compound:	%empty { $$ = new iCCompoundStatement(*parser_context); parser_context->open_scope("comp"); }; // dummy rule to prepare scope for compound statement
 
 //iCTimeout is created without body to prep the scope for the body items
@@ -942,13 +970,14 @@ timeout	:	TTIMEOUT TLPAREN expr TRPAREN // 1 2 3 4
 /*************************************************************************************************/     
 /*                                 E X P R E S S I O N S                                         */     
 /*************************************************************************************************/
+//iCExpression*
 expr 		: assignment_expr 
 	 		;
-	 
+//iCExpression*
 assignment_expr : binary_expr 
 				| unary_expr assignement_op assignment_expr {$$ = new iCAssignmentExpression($1, *$2, $3, *parser_context); delete $2;}
 				;
-				
+//iCExpression*
 binary_expr : cast_expr 
 			| binary_expr	 TLOR		binary_expr {$$ = new iCBinaryExpression($1, *$2, $3, *parser_context); delete $2;}
 			| binary_expr	 TLAND		binary_expr {$$ = new iCBinaryExpression($1, *$2, $3, *parser_context); delete $2;}
@@ -969,7 +998,7 @@ binary_expr : cast_expr
 			| binary_expr	 TDIV		binary_expr {$$ = new iCBinaryExpression($1, *$2, $3, *parser_context); delete $2;}
 			| binary_expr	 TPERC		binary_expr {$$ = new iCBinaryExpression($1, *$2, $3, *parser_context); delete $2;}
 			;
-		  
+//iCExpression*
 unary_expr 	: postfix_expr 
 		   	| TINC unary_expr {$$ = new iCUnaryExpression(*$1, $2, *parser_context); delete $1;}
 		   	| TDEC unary_expr {$$ = new iCUnaryExpression(*$1, $2, *parser_context); delete $1;}
@@ -979,7 +1008,7 @@ unary_expr 	: postfix_expr
 		   	/*| TSIZEOF unary_expr {$$ = new iCUnaryExpression($1, $2);}*/
 		   	/*| TSIZEOF type_name {$$ = new iCUnaryExpression($1, $2);}*/
 		   	;
-		   	
+//iCExpression*
 postfix_expr : primary_expr 
 			 | postfix_expr TLBRACKET expr TRBRACKET // array indexing
 			   {
@@ -1022,7 +1051,7 @@ arg_expr_list  :	arg_expr_list TCOMMA assignment_expr
 						   $$->push_back($1);
 					}
 			   ;
-
+//iCExpression*
 primary_expr : TTRUE   {$$ = new iCLogicConst(true, *parser_context); $1;}
 			 | TFALSE  {$$ = new iCLogicConst(false, *parser_context); $1;}
 			 | TICONST {$$ = new iCInteger(*$1, *parser_context); delete $1;}
@@ -1046,16 +1075,26 @@ primary_expr : TTRUE   {$$ = new iCLogicConst(true, *parser_context); $1;}
 						}
 						else
 						{
-							$$ = new iCIdentifier(*$1, var->scope, *parser_context);
-							const iCProcess* proc = parser_context->get_process();
+							std::cout << "parser primary_expr: meet declared var'"<<var->name<<"' at line "<<parser_context->line() << std::endl;
+							iCIdentifier* id = new iCIdentifier(*$1, var->scope, *parser_context);
+							$$ = id;
 
-							if(NULL != proc)//added because of functions - vars in functions don't belong to any proc
+							const iCProcess* proc = parser_context->get_process();
+							if (NULL != proc)
 							{
 								if(0 != proc->activator.compare("background"))
 								{
 									//Mark var as used in ISR - used for volatile checks
 									var->used_in_isr = true;
 									parser_context->add_to_second_pass(var);
+								}
+							}
+							else //var belongs to a function or a proctype
+							{
+								iCProcType* proctype = parser_context->modify_proctype();
+								if (NULL != proctype)
+								{
+									proctype->add_identifier(id);
 								}
 							}
 						}
@@ -1118,6 +1157,7 @@ assignement_op : TASSGN
 //for now we just shove it all in a string, call it type_name
 //and let the c compiler deal with it
 //=============================================================================
+//iCExpression*
 cast_expr 	: unary_expr 
 			| TLPAREN type_name TRPAREN cast_expr 
 			  {
@@ -1126,6 +1166,7 @@ cast_expr 	: unary_expr
 				  $1; $3; 
 			  }
 		  	;
+//std::string*
 type_name	:	decl_specs 
 				{
 					$$ = new std::string;
@@ -1143,7 +1184,7 @@ type_name	:	decl_specs
 				delete $2; 
 			}
 			;
-
+//std::string*
 abstract_declarator	:	pointer 
 					|	direct_abstract_declarator
 					|	pointer direct_abstract_declarator 
@@ -1153,7 +1194,7 @@ abstract_declarator	:	pointer
 							delete $2; 
 						}
 					;
-
+//std::string*
 direct_abstract_declarator	:	TLPAREN abstract_declarator TRPAREN
 								{
 									$$ = new std::string;
@@ -1191,7 +1232,7 @@ direct_abstract_declarator	:	TLPAREN abstract_declarator TRPAREN
 							//|	direct_abstract_declarator '(' ')'
 							//|	direct_abstract_declarator '(' parameter_type_list ')'
 							;
-
+//std::string*
 pointer	:	TASTERISK 
 			{
 				$$ = new std::string("*"); 
@@ -1220,6 +1261,7 @@ pointer	:	TASTERISK
 //Need to allow declarations and definitions with redefinition (body != NULL)
 //and undefined (body == NULL on second pass) checks
 //=============================================================================
+//iCFunction*
 func_definition			:	decl_specs func_declarator
 							{
 								parser_context->set_func($<func>2);//entering function
@@ -1240,11 +1282,11 @@ func_definition			:	decl_specs func_declarator
 								parser_context->set_func(NULL);//leaving function
 							}
 						;
-
+//iCStatement*
 func_body				:	compound_statement { $$ = $1; }
 						|	TSEMIC { $$ = NULL; $1; }
 						;
-
+//iCFunction*
 func_declarator			: TIDENTIFIER TLPAREN TRPAREN //function with empty parentheses - no params
 						  {
 							  parser_context->check_identifier_defined(*$1);
@@ -1279,16 +1321,16 @@ func_declarator			: TIDENTIFIER TLPAREN TRPAREN //function with empty parenthese
 param_list				: param_list TCOMMA param_declarator 
 						  {
 							  $$ = $1;
-							  $$->push_back($3);
+							  $$->push_back(std::shared_ptr<iCVariable>($3));
 							  delete $2;
 						  }
 						| param_declarator 
 						{
-							$$ = new std::list<iCVariable*>;
-							$$->push_back($1);
+							$$ = new iCVariablesList;
+							$$->push_back(std::shared_ptr<iCVariable>($1));
 						}
 						;
-
+//iCVariable*
 param_declarator		: decl_specs direct_declarator 
 						  {
 							  $$ = $2;
@@ -1298,47 +1340,47 @@ param_declarator		: decl_specs direct_declarator
 						;
 
 //=============================================================================
-//Variable Declaration
+//Variable Declaration (iCVariablesList*)
 //=============================================================================
 var_declaration			:	decl_specs init_declarator_list TSEMIC 
 							{
 								$$ = $2;
-								for(std::list<iCVariable*>::iterator i=$2->begin();i!=$2->end();i++)
+								for(iCVariablesList::iterator i=$2->begin();i!=$2->end();i++)
 								{
-									iCVariable* var = *i;
+									std::shared_ptr<iCVariable> var = *i;
 									var->set_type_specs(*$1);
 								}
 								delete $1;
 								$3;//suppress unused value warning
 							}
 						;
-
+//declaration specifieres (consists of type specifiers) (iCStringList*)
 decl_specs				:	decl_specs type_spec {$1->push_back(*$2); delete $2; $$=$1;}
 						|	type_spec {$$ = new iCStringList; $$->push_back(*$1); delete $1;}
 						;
-
+//list of declared variables of similar type (iCVariablesList*)
 init_declarator_list	:	init_declarator_list TCOMMA init_declarator 
 							{
 								$$=$1;
-								$1->push_back($3);
+								$1->push_back(std::shared_ptr<iCVariable>($3));
 								delete $2;
 							}
 						|	init_declarator 
 							{
-								$$ = new std::list<iCVariable*>;
-								$$->push_back($1);
+								$$ = new iCVariablesList;
+								$$->push_back(std::shared_ptr<iCVariable>($1));
 							}
 						;
-
+//declaration without (a) or with initializer (a = 5) (iCVariable*)
 init_declarator			:	direct_declarator {$$ = $1;}
 						|	direct_declarator TASSGN initializer 
 							{
 								$$ = $1;
-								$$->set_initializer($3);
+								$$->set_initializer(std::shared_ptr<iCInitializer>($3));
 								delete $2;
 							}
 						;
-
+//iCVariable*
 //can be just as simple as a variable name
 //or an array name with dimensions in brackets, e.g. matrix[3][10]
 //in C these can get really complex, with pointers, function pointers etc.
@@ -1354,17 +1396,20 @@ direct_declarator		:	TIDENTIFIER
 						| direct_declarator TLBRACKET binary_expr TRBRACKET //explicit array dimension
 						{
 							$$ = $1;
-							$$->add_dimension($3);
+							$$->add_dimension(std::shared_ptr<iCExpression>($3));
 							$2;$4;
 						}
 						| direct_declarator TLBRACKET TRBRACKET //implicit array dimension (size will be specified by initializer)
 						{
 							$$ = $1;
-							$$->add_dimension(NULL); //dimension size is implicit
+							//todo: pointer, wont't it be destroyed when out this block?
+							std::shared_ptr<iCExpression> null_dimension;
+							null_dimension.reset();
+							$$->add_dimension(null_dimension); //dimension size is implicit
 							$2;$3;
 						}
 						;
-
+//iCInitializer*
 //initializers form a tree in case of multi-dimensional arrays
 //array initializer list can be optionally terminated with an extra comma (C legacy)
 initializer 			:	assignment_expr  //simple variable initializer
@@ -1384,6 +1429,7 @@ initializer 			:	assignment_expr  //simple variable initializer
 								$1;$4;
 							}
 						;
+//iCInitializer*
 initializer_list		:	initializer_list TCOMMA initializer 
 							{
 								$$ = $1;
@@ -1395,7 +1441,7 @@ initializer_list		:	initializer_list TCOMMA initializer
 								$$ = $1;
 							}
 						;
-
+//type specifier (std::string*)
 type_spec				:	TVOID	
 						|	TCHAR	
 						|	TINT		
