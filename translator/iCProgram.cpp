@@ -172,9 +172,9 @@ void iCProgram::gen_code(CodeGenContext& context)
 	//code for background processes
 	hps["background"]->gen_code(context);
 
-	/*//parameterized processes
+	//parameterized processes
 	for (std::list<iCProcTypeInstantiation*>::iterator i = instantiations.begin(); i != instantiations.end(); i++)
-		(*i)->gen_code(context);*/
+		(*i)->gen_code(context);
 
 	//program footer
 	context.indent_depth--;
@@ -196,9 +196,10 @@ iCProgram::~iCProgram()
     for (iCProctypeMap::iterator i = proctypes.begin(); i != proctypes.end(); i++)
         delete i->second;
 
-	//clear proctype_instantiations
+	//todo: free memory
+	/*//clear proctype_instantiations
 	for (std::list<iCProcTypeInstantiation*>::iterator i = instantiations.begin(); i != instantiations.end(); i++)
-		delete *i;
+		delete *i;*/
 
 	//clear mcu declarations
 	for (iCDeclarationList::iterator i=mcu_decls.begin(); i!=mcu_decls.end(); i++)

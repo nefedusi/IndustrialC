@@ -498,7 +498,10 @@ proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
 								parser_context->err_msg("process redefinition: %s already defined in %s",
 									$2->c_str(), scope->name.empty() ? "this scope" : scope->name.c_str());
 							}
-							$$ = new iCProcTypeInstantiation(ic_program, *$1, *$2);
+
+							$$ = new iCProcTypeInstantiation(ic_program, *$1, *$2, *parser_context);
+							$$->set_hp("background"); //todo: other hyperprocesses
+							parser_context->add_to_second_pass($$);
 
 							delete $1;
 							delete $2;

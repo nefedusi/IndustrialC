@@ -2,7 +2,7 @@
 
 //void myfunc() {}
 
-/*myproctype proc1 (); //OK
+myproctype proc1 (); //OK
 proctype myproctype () {
 	state FS_START
 	{
@@ -13,7 +13,7 @@ proctype myproctype () {
 
 	}
 }
-myproctype proc2();*/
+myproctype proc2();
 //myproctype proc1(); //duplicate proc instance
 
 //duplicate proctype
@@ -41,10 +41,13 @@ anotherproctype aproc2();*/
 
 process Init : background
 {
+	int a=1;
 	state FS_START
 	{
+		int c = a + 3; //b can't be used here, it's still undeclaered
 		restart;
 	}
+	int b=2;
 }
 
 //myproctype Init(); //duplicate with non-parameterized process
