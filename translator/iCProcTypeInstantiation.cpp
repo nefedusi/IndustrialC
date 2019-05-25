@@ -38,6 +38,9 @@ void iCProcTypeInstantiation::gen_code(CodeGenContext& context)
 {
 	std::cout << "iCProcTypeInstantiation.gen_code called for " << name << std::endl;
 
+	//update context
+	context.proctype_instantiation = this;
+
 	iCVariablesList var_list = proctype->get_variables();
 	for (iCVariablesList::iterator i = var_list.begin(); i != var_list.end(); i++)
 	{
@@ -51,9 +54,6 @@ void iCProcTypeInstantiation::gen_code(CodeGenContext& context)
 		context.enable_indentation();
 		context.to_code("");
 	}
-
-	//update context
-	context.process = this;
 
 	//Add comments
 	context.to_code_fmt("%s\n", C_COMMENT_FRAME);
@@ -71,6 +71,7 @@ void iCProcTypeInstantiation::gen_code(CodeGenContext& context)
 	iCStateList state_list = proctype->get_states();
 	for (iCStateList::iterator i = state_list.begin(); i != state_list.end(); i++)
 		(*i)->gen_code(context);
+	std::cout << "iCProcTypeInstantiation.gen_code after gen_code for states" << std::endl;
 
 	//process footer
 	context.indent_depth--;
@@ -78,7 +79,7 @@ void iCProcTypeInstantiation::gen_code(CodeGenContext& context)
 	context.to_code_fmt("}  //process %s\n\n", name.c_str());
 
 	//update context
-	context.process = NULL;
+	context.proctype_instantiation = NULL;
 
 	std::cout << "iCProcTypeInstantiation.gen_code ended for " << name << std::endl;
 }

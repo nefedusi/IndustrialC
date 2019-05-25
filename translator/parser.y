@@ -961,13 +961,14 @@ timeout	:	TTIMEOUT TLPAREN expr TRPAREN // 1 2 3 4
 /*************************************************************************************************/     
 /*                                 E X P R E S S I O N S                                         */     
 /*************************************************************************************************/
+//iCExpression*
 expr 		: assignment_expr 
 	 		;
-	 
+//iCExpression*
 assignment_expr : binary_expr 
 				| unary_expr assignement_op assignment_expr {$$ = new iCAssignmentExpression($1, *$2, $3, *parser_context); delete $2;}
 				;
-				
+//iCExpression*
 binary_expr : cast_expr 
 			| binary_expr	 TLOR		binary_expr {$$ = new iCBinaryExpression($1, *$2, $3, *parser_context); delete $2;}
 			| binary_expr	 TLAND		binary_expr {$$ = new iCBinaryExpression($1, *$2, $3, *parser_context); delete $2;}
@@ -988,7 +989,7 @@ binary_expr : cast_expr
 			| binary_expr	 TDIV		binary_expr {$$ = new iCBinaryExpression($1, *$2, $3, *parser_context); delete $2;}
 			| binary_expr	 TPERC		binary_expr {$$ = new iCBinaryExpression($1, *$2, $3, *parser_context); delete $2;}
 			;
-		  
+//iCExpression*
 unary_expr 	: postfix_expr 
 		   	| TINC unary_expr {$$ = new iCUnaryExpression(*$1, $2, *parser_context); delete $1;}
 		   	| TDEC unary_expr {$$ = new iCUnaryExpression(*$1, $2, *parser_context); delete $1;}
@@ -998,7 +999,7 @@ unary_expr 	: postfix_expr
 		   	/*| TSIZEOF unary_expr {$$ = new iCUnaryExpression($1, $2);}*/
 		   	/*| TSIZEOF type_name {$$ = new iCUnaryExpression($1, $2);}*/
 		   	;
-		   	
+//iCExpression*
 postfix_expr : primary_expr 
 			 | postfix_expr TLBRACKET expr TRBRACKET // array indexing
 			   {
@@ -1041,7 +1042,7 @@ arg_expr_list  :	arg_expr_list TCOMMA assignment_expr
 						   $$->push_back($1);
 					}
 			   ;
-
+//iCExpression*
 primary_expr : TTRUE   {$$ = new iCLogicConst(true, *parser_context); $1;}
 			 | TFALSE  {$$ = new iCLogicConst(false, *parser_context); $1;}
 			 | TICONST {$$ = new iCInteger(*$1, *parser_context); delete $1;}
@@ -1066,7 +1067,7 @@ primary_expr : TTRUE   {$$ = new iCLogicConst(true, *parser_context); $1;}
 						else
 						{
 							const iCProcess* proc = parser_context->get_process();
-							if(NULL != proc)//added because of functions - vars in functions don't belong to any proc
+							if(NULL != proc)//added because of functions and proctypes - vars inside them don't belong to any proc
 							{
 								if(0 != proc->activator.compare("background"))
 								{
@@ -1081,6 +1082,7 @@ primary_expr : TTRUE   {$$ = new iCLogicConst(true, *parser_context); $1;}
 								const iCProcType* proctype = parser_context->get_proctype();
 								if (NULL != proctype) //var belongs to a proctype
 								{
+									std::cout << "var id in proctype found " << *$1 << std::endl;
 									$$ = new iCIdentifierInProcType(*$1, var->scope, *parser_context);
 									//$$ = new iCIdentifier(*$1, var->scope, *parser_context);
 								}
@@ -1130,7 +1132,7 @@ primary_expr : TTRUE   {$$ = new iCLogicConst(true, *parser_context); $1;}
 					delete $1;
 				}
 			 ;
-
+//std::string*
 assignement_op : TASSGN 
 			   | TR_ASSGN  		
 			   | TL_ASSGN 		
@@ -1149,6 +1151,7 @@ assignement_op : TASSGN
 //for now we just shove it all in a string, call it type_name
 //and let the c compiler deal with it
 //=============================================================================
+//iCExpression*
 cast_expr 	: unary_expr 
 			| TLPAREN type_name TRPAREN cast_expr 
 			  {

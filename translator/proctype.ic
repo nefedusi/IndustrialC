@@ -8,18 +8,17 @@ proctype myproctype () {
 	state FS_START
 	{
 		int d = 1;
-		//int e = d+2;
-		/*int e = a;
-		int f = d+2;
-		int g = d + a;
-		int h = b;*/
+		int e = a+1;
+		//int f = c; //c can't be used here, it's still undeclaered
+		/*int f = d+2;
+		int g = d + a;*/
 	}
 	int b[3] = { 1,2,3 };
 	state AnotherState
 	{
-
+		int h = a + b[2] + 3;
 	}
-	//int c = a+b;
+	int c = a + 1 + b[2];
 }
 myproctype proc2();
 //myproctype proc1(); //duplicate proc instance
@@ -56,7 +55,7 @@ process Init : background
 		int d = c + 4;
 		restart;
 	}
-	int b=2;
+	int b=a; //it works
 }
 
 //myproctype Init(); //duplicate with non-parameterized process

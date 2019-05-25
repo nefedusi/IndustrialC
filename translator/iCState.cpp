@@ -15,8 +15,19 @@ void iCState::gen_code(CodeGenContext& context)
 	std::cout.flush();
 #endif
 
-	std::string state_name = special ? name : (context.process->name + name);
-
+	//todo: use same parent for process and proctype instantiation?
+	std::string state_name;
+	if (special)
+	{
+		state_name = name;
+	} else
+	{
+		if (NULL != context.process)
+			state_name = context.process->name + name;
+		else
+			state_name = context.proctype_instantiation->name + name;
+	}
+	
 	//update context
 	context.state = this;
 
