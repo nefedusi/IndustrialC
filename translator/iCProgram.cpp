@@ -172,10 +172,6 @@ void iCProgram::gen_code(CodeGenContext& context)
 	//code for background processes
 	hps["background"]->gen_code(context);
 
-	//parameterized processes
-	for (std::list<iCProcTypeInstantiation*>::iterator i = instantiations.begin(); i != instantiations.end(); i++)
-		(*i)->gen_code(context);
-
 	//program footer
 	context.indent_depth--;
 	context.indent(); context.to_code_fmt("} //while loop\n");
@@ -197,11 +193,6 @@ iCProgram::~iCProgram()
     //clear proctypes
     for (iCProctypeMap::iterator i = proctypes.begin(); i != proctypes.end(); i++)
         delete i->second;
-
-	//todo: free memory
-	/*//clear proctype_instantiations
-	for (std::list<iCProcTypeInstantiation*>::iterator i = instantiations.begin(); i != instantiations.end(); i++)
-		delete *i;*/
 
 	//clear mcu declarations
 	for (iCDeclarationList::iterator i=mcu_decls.begin(); i!=mcu_decls.end(); i++)
@@ -237,17 +228,6 @@ void iCProgram::add_proctype(iCProcType* proctype)
     //printf("proctypes size=%d\n", proctypes.size());
 }
 
-void iCProgram::add_proctype_instantiation(iCProcTypeInstantiation* instantiation)
-{
-	if (NULL == instantiation)
-	{
-		std::cout << "iCProgram::add_proctype_instantiation: NULL instantiation" << std::endl;
-		return;
-	}
-	instantiations.push_back(instantiation);
-	printf("iCProgram add_proctype_instantiation ended, instantiations size=%d\n", instantiations.size());
-}
-
 //=================================================================================================
 //
 //=================================================================================================
@@ -261,6 +241,7 @@ void iCProgram::add_process( iCProcess* proc )
 		return;
 	}
 
+	//todo: what if all procs are parameterized?
 	if(NULL == first_bkgrnd_process && 0==proc->activator.compare("background"))
 		first_bkgrnd_process = proc;
 

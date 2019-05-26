@@ -31,7 +31,6 @@ public:
 	virtual ~iCProgram();
 	void add_hyperprocess(iCHyperprocess* hp);
 	void add_proctype(iCProcType* proctype);
-	void add_proctype_instantiation(iCProcTypeInstantiation* instantiation);
 	void add_process(iCProcess* proc);
 	void add_mcu_declaration(iCDeclaration* decl);
 	void add_variable(iCVariable* var) { var_list.push_back(var); }

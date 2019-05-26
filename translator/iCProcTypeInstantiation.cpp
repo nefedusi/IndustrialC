@@ -49,7 +49,6 @@ void iCProcTypeInstantiation::gen_code(CodeGenContext& context)
 		std::cout << "iCProcTypeInstantiation: instance var full_name=" << var->full_name << std::endl;
 
 		context.disable_indentation();
-		std::cout << "indentation disabled" << std::endl;
 		var->gen_code(context);
 		context.enable_indentation();
 		context.to_code("");
@@ -71,7 +70,6 @@ void iCProcTypeInstantiation::gen_code(CodeGenContext& context)
 	iCStateList state_list = proctype->get_states();
 	for (iCStateList::iterator i = state_list.begin(); i != state_list.end(); i++)
 		(*i)->gen_code(context);
-	std::cout << "iCProcTypeInstantiation.gen_code after gen_code for states" << std::endl;
 
 	//process footer
 	context.indent_depth--;
