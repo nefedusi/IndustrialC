@@ -1080,15 +1080,11 @@ primary_expr : TTRUE   {$$ = new iCLogicConst(true, *parser_context); $1;}
 							else
 							{
 								const iCProcType* proctype = parser_context->get_proctype();
-								//const iCState* state = parser_context->get_state();
-								//const iCScope* var_scope = parser_context->get_var_scope(*$1);
-								//const iCScope* proctype_scope = parser_context->get_proctype_scope(proctype->name);
-
-								bool var_belongs_to_proctype = false; //var is inside proctype but it's not state local var
 								if (NULL != proctype) 
 								{
 									std::cout << "parser.y proctype is not null" << std::endl;
 
+									bool var_belongs_to_proctype = false; //var is inside proctype but it's not state local var
 									iCVariablesList var_list = proctype->get_variables();
 									for (iCVariablesList::iterator i = var_list.begin(); i != var_list.end(); i++)
 									{
