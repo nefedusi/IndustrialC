@@ -41,6 +41,24 @@ void iCProcTypeInstantiation::gen_code(CodeGenContext& context)
 	//update context
 	context.proctype_instantiation = this;
 
+	iCStateList state_list = proctype->get_states();
+	if (2 <= state_list.size())//proctype has states other than FS_START
+	{
+		//state names enumerators
+		unsigned int state_id = 3;
+		context.to_code_fmt("enum %s_STATES\n{\n", name.c_str());
+		for (iCStateList::const_iterator s = state_list.begin(); s != state_list.end(); s++)
+		{
+			iCState& state = **s;
+			if (!state.special)
+			{
+				std::string state_name = name + state.name;
+				context.to_code_fmt("\t%s=%d,\n", state_name.c_str(), state_id++);
+			}
+		}
+		context.to_code_fmt("};\n\n");
+	}
+
 	iCVariablesList var_list = proctype->get_variables();
 	for (iCVariablesList::iterator i = var_list.begin(); i != var_list.end(); i++)
 	{
@@ -67,7 +85,6 @@ void iCProcTypeInstantiation::gen_code(CodeGenContext& context)
 	context.to_code_fmt("{\n");
 	context.indent_depth++;
 
-	iCStateList state_list = proctype->get_states();
 	for (iCStateList::iterator i = state_list.begin(); i != state_list.end(); i++)
 		(*i)->gen_code(context);
 

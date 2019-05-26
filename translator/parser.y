@@ -384,6 +384,7 @@ program_item	:	var_declaration	//global var declarations
 					}
 				|	proctype_instantiation
 					{
+						$1;
 						$$ = NULL;
 					}
 				|	hp_definition // hyperprocess definitions with hp name, vector, register & bit
