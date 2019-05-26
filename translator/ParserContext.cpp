@@ -9,6 +9,7 @@ extern bool had_errors;
 //=================================================================================================
 ParserContext::ParserContext()
 	:	program(NULL),
+		proctype(NULL),
 		process(NULL),
 		state(NULL),
 		line_num(1),

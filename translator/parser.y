@@ -706,8 +706,8 @@ state_block_item	:	block_item	{$$ = $1;}
 							parser_context->modify_state()->set_timeout($1);//a hack to access the state
 						}
 					;
-
-block_item	:	var_declaration 
+//iCBlockItem*
+block_item	:	var_declaration //iCVariablesList*
 				{
 					// these are local variables - make sure we are inside a state or a function
 					ICASSERT(NULL != parser_context->get_func() || NULL != parser_context->get_state());
@@ -1080,11 +1080,31 @@ primary_expr : TTRUE   {$$ = new iCLogicConst(true, *parser_context); $1;}
 							else
 							{
 								const iCProcType* proctype = parser_context->get_proctype();
-								if (NULL != proctype) //var belongs to a proctype
+								//const iCState* state = parser_context->get_state();
+								//const iCScope* var_scope = parser_context->get_var_scope(*$1);
+								//const iCScope* proctype_scope = parser_context->get_proctype_scope(proctype->name);
+
+								bool var_belongs_to_proctype = false; //var is inside proctype but it's not state local var
+								if (NULL != proctype) 
 								{
-									std::cout << "var id in proctype found " << *$1 << std::endl;
-									$$ = new iCIdentifierInProcType(*$1, var->scope, *parser_context);
-									//$$ = new iCIdentifier(*$1, var->scope, *parser_context);
+									std::cout << "parser.y proctype is not null" << std::endl;
+
+									iCVariablesList var_list = proctype->get_variables();
+									for (iCVariablesList::iterator i = var_list.begin(); i != var_list.end(); i++)
+									{
+										if (0 == (*i)->name.compare(*$1))
+										{
+											std::cout << "var " << *$1 << " in proctype and out state" << std::endl;
+											$$ = new iCIdentifierInProcType(*$1, var->scope, *parser_context);
+											var_belongs_to_proctype = true;
+											break;
+										}
+									}
+									if (!var_belongs_to_proctype)
+									{
+										std::cout << "var "<< *$1 <<" in proctype and in state" << std::endl;
+										$$ = new iCIdentifier(*$1, var->scope, *parser_context);
+									}
 								}
 								else
 								{
