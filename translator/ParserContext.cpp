@@ -9,6 +9,7 @@ extern bool had_errors;
 //=================================================================================================
 ParserContext::ParserContext()
 	:	program(NULL),
+		proctype(NULL),
 		process(NULL),
 		state(NULL),
 		line_num(1),
@@ -28,6 +29,7 @@ ParserContext::ParserContext()
 //=================================================================================================
 ParserContext::~ParserContext()
 {
+	std::cout << "ParserContext entered destructor" << std::endl;
 	delete root_scope; //the scope tree recursively deletes itself (see iCScope destructor)
 }
 
@@ -58,6 +60,7 @@ void ParserContext::close_scope()
 //=================================================================================================
 void ParserContext::add_var_to_scope(iCVariable* decl)
 {
+	std::cout << "ParserContext.add_var_to_scope: scopename=" << current_scope->name << std::endl;
 	current_scope->vars.push_back(decl);
 }
 
@@ -131,6 +134,21 @@ const iCScope* ParserContext::get_proc_scope(const std::string& name)const
 	{
 		std::set<std::string>::iterator it = scope->processes.find(name);
 		if(scope->processes.end() != it)
+			return scope;
+
+		//go up the scope tree
+		scope = scope->prev_scope;
+	}
+	return NULL;
+}
+
+const iCScope* ParserContext::get_proctype_scope(const std::string& name) const
+{
+	iCScope* scope = current_scope;
+	while (NULL != scope)
+	{
+		std::set<std::string>::iterator it = scope->proctypes.find(name);
+		if (scope->proctypes.end() != it)
 			return scope;
 
 		//go up the scope tree

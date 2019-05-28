@@ -20,10 +20,10 @@ class iCProgram : public iCNode
 	iCHyperprocessMap hps;//map of all hyperprocesses
 	iCProctypeMap proctypes; //map of all proctypes
 
-	std::list<iCProcTypeInstantiation*> instantiations; //instantiations (just for memory control)
+	std::list<iCProcTypeInstantiation*> instantiations;
 	iCDeclarationList mcu_decls;//vector/register/bit name definitions
 	iCProcessMap procs; // does not own, auxiliary list for quick checks
-	std::list<iCVariable*> var_list;//list of defined variables
+	iCVariablesList var_list;//list of defined variables
 	std::list<iCFunction*> func_list;//list of defined functions
 
 public:
@@ -31,7 +31,6 @@ public:
 	virtual ~iCProgram();
 	void add_hyperprocess(iCHyperprocess* hp);
 	void add_proctype(iCProcType* proctype);
-	void add_proctype_instantiation(iCProcTypeInstantiation* instantiation);
 	void add_process(iCProcess* proc);
 	void add_mcu_declaration(iCDeclaration* decl);
 	void add_variable(iCVariable* var) { var_list.push_back(var); }

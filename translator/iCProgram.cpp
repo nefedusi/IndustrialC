@@ -35,7 +35,7 @@ void iCProgram::gen_code(CodeGenContext& context)
 		(*i)->gen_code(context);
 
 	//variable declarations
-	for(std::list<iCVariable*>::iterator i=var_list.begin();i!=var_list.end();i++)
+	for(iCVariablesList::iterator i=var_list.begin();i!=var_list.end();i++)
 		(*i)->gen_code(context);
 
 	//function definitions
@@ -184,6 +184,8 @@ void iCProgram::gen_code(CodeGenContext& context)
 //=================================================================================================
 iCProgram::~iCProgram()
 {
+	std::cout << "iCProgram destructor called" << std::endl;
+
 	//clear the hyperprocesses
 	for (iCHyperprocessMap::iterator i=hps.begin(); i!=hps.end(); i++)
 		delete i->second;
@@ -191,10 +193,6 @@ iCProgram::~iCProgram()
     //clear proctypes
     for (iCProctypeMap::iterator i = proctypes.begin(); i != proctypes.end(); i++)
         delete i->second;
-
-	//clear proctype_instantiations
-	for (std::list<iCProcTypeInstantiation*>::iterator i = instantiations.begin(); i != instantiations.end(); i++)
-		delete *i;
 
 	//clear mcu declarations
 	for (iCDeclarationList::iterator i=mcu_decls.begin(); i!=mcu_decls.end(); i++)
@@ -205,8 +203,10 @@ iCProgram::~iCProgram()
 		delete *i;
 
 	//clear variables
-	for (std::list<iCVariable*>::iterator i=var_list.begin(); i!=var_list.end(); i++)
+	for (iCVariablesList::iterator i=var_list.begin(); i!=var_list.end(); i++)
 		delete *i;
+
+	std::cout << "iCProgram: ended destructor" << std::endl;
 }
 
 void iCProgram::add_proctype(iCProcType* proctype)
@@ -228,17 +228,6 @@ void iCProgram::add_proctype(iCProcType* proctype)
     //printf("proctypes size=%d\n", proctypes.size());
 }
 
-void iCProgram::add_proctype_instantiation(iCProcTypeInstantiation* instantiation)
-{
-	if (NULL == instantiation)
-	{
-		std::cout << "iCProgram::add_proctype_instantiation: NULL instantiation" << std::endl;
-		return;
-	}
-	instantiations.push_back(instantiation);
-	printf("iCProgram add_proctype_instantiation ended, instantiations size=%d\n", instantiations.size());
-}
-
 //=================================================================================================
 //
 //=================================================================================================
@@ -252,6 +241,7 @@ void iCProgram::add_process( iCProcess* proc )
 		return;
 	}
 
+	//todo: what if all procs are parameterized?
 	if(NULL == first_bkgrnd_process && 0==proc->activator.compare("background"))
 		first_bkgrnd_process = proc;
 

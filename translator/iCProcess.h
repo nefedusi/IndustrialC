@@ -17,13 +17,14 @@ public:
 	void mark_isr_referenced() const {const_cast<iCProcess*>(this)->isr_referenced = true;}//hack
 	bool is_isr_referenced()const{return isr_referenced;}
 
-    std::string name; 
+	std::string name;
 	std::string activator;
-    iCStateList states;
+	iCStateList states;
 	const iCState* start_state; //does not own
 	const iCState* stop_state; //does not own
 	
 	iCProcess(const std::string& name, const ParserContext& context);
+	virtual ~iCProcess();
 
 	void set_hp(const std::string& hp_name) 
 	{

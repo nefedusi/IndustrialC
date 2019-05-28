@@ -10,11 +10,19 @@ iCProcType::iCProcType(const std::string& name, const ParserContext& context) : 
     this->name = name;
 }
 
+iCProcType::~iCProcType()
+{
+	for (iCVariablesList::iterator i = var_list.begin(); i != var_list.end(); i++)
+		delete *i;
+
+	for (iCStateList::iterator i = states.begin(); i != states.end(); i++)
+		delete *i;
+}
+
 void iCProcType::add_states(const iCStateList& states)
 {
-	printf("iCProcType %s entered add_states\n", this->name.c_str());
 	this->states = states;
-	printf("iCProcType states size argument=%d, this->states size=%d\n", states.size(), this->states.size());
+	printf("iCProcType.add_states: argument states size=%d, this->states size=%d\n", states.size(), this->states.size());
 	//todo: if (isr_driven) ? (see iCProcess)
 }
 

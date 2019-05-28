@@ -19,6 +19,7 @@ iCInitializer::~iCInitializer()
 //=================================================================================================
 void iCInitializer::gen_code( CodeGenContext& context )
 {
+	std::cout << "iCInitializer::gen_code " << std::endl;
 #ifdef ICDEBUG_TRACE
 	std::cout<<"iCInitializer::gen_code " << "...";
 	std::cout.flush();
@@ -30,6 +31,7 @@ void iCInitializer::gen_code( CodeGenContext& context )
 	{
 		//single assignment expression - tree leaf
 		initializers[0]->gen_code(context);
+		std::cout << "iCInitializer::gen_code after calling gen_code for single initializer" << std::endl;
 	}
 	else
 	{
