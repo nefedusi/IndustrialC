@@ -1110,15 +1110,42 @@ primary_expr : TTRUE   {$$ = new iCLogicConst(true, *parser_context); $1;}
 					{
 						$$ = new iCMCUIdentifier(*$1, *parser_context);
 					}
-					else // variable
+					else // variable or proctype param
 					{
 						iCVariable* var = parser_context->get_var(*$1);
-						if(NULL == var) // undeclared variable
+						if(NULL == var) // proctype param or undeclared variable
 						{
-							parser_context->err_msg("%s was not declared in this scope", $1->c_str());
-							$$ = new iCIdentifier(*$1, NULL, *parser_context);
+							const iCProcType* proctype = parser_context->get_proctype();
+							if (NULL != proctype)
+							{
+								std::cout << "parser.y proctype is not null" << std::endl;
+
+								bool id_is_proctype_param = false;
+								iCIdentifierList params_list = proctype->get_params();
+								for (iCIdentifierList::iterator i = params_list.begin(); i != params_list.end(); i++)
+								{
+									if (0 == (*i)->name.compare(*$1))
+									{
+										std::cout << "id " << *$1 << " is proctype param" << std::endl;
+										//todo: fill scope
+										$$ = new iCIdentifierInProcType(*$1, NULL, *parser_context);
+										id_is_proctype_param = true;
+										break;
+									}
+								}
+								if (!id_is_proctype_param)
+								{
+									parser_context->err_msg("id is not proctype param, %s was not declared in this scope", $1->c_str());
+									$$ = new iCIdentifier(*$1, NULL, *parser_context);
+								}
+							}
+							else //NULL == proctype
+							{
+								parser_context->err_msg("%s was not declared in this scope", $1->c_str());
+								$$ = new iCIdentifier(*$1, NULL, *parser_context);
+							}
 						}
-						else
+						else //NULL != var
 						{
 							const iCProcess* proc = parser_context->get_process();
 							if(NULL != proc)//added because of functions and proctypes - vars inside them don't belong to any proc
