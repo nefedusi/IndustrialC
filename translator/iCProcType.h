@@ -14,11 +14,11 @@ public:
 	void add_states(const iCStateList& states);
 	void add_variable(iCVariable* var)
 	{
-		std::cout << "iCProcType: entered add_variable " << var->name << std::endl;
+		//std::cout << "iCProcType: entered add_variable " << var->name << std::endl;
 		var_list.push_back(var);
 	}
 	//const iCStateList& copy_states() const;
-	const iCStateList& get_states() const { printf("iCProctype get_states called\n"); return states; }
-	const iCVariablesList& get_variables() const { printf("iCProctype get_variables called\n"); return var_list; }
+	const iCStateList& get_states() const { return states; }
+	const iCVariablesList& get_variables() const { return var_list; }
 	virtual void gen_code(CodeGenContext& context); //todo: remove gen_code
 };

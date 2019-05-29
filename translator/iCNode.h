@@ -63,4 +63,4 @@ typedef std::map<std::string, iCProcType*> iCProctypeMap;
 typedef std::map<std::string, iCProcess*> iCProcessMap;
 typedef std::vector<iCState*> iCStateList;
 typedef std::list<iCVariable*> iCVariablesList;
-typedef std::vector<iCIdentifier*> iCIdentifierList;
+typedef std::list<iCIdentifier*> iCIdentifierList;

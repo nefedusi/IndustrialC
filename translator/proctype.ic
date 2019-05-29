@@ -4,7 +4,7 @@ int global;
 //void myfunc() {}
 
 myproctype proc1 (); //OK
-proctype myproctype ()
+proctype myproctype (m, n, p)
 {
 	int a=1;
 	state FS_START

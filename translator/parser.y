@@ -245,6 +245,7 @@
 %type <variable>			param_declarator
 %type <statement>			for_init_statement
 //%type <token>				for_prep_scope
+%type <ident_list>			proctype_param_list
 
 %type <string>				program_items_list
 %type <string>				program_item
@@ -454,9 +455,41 @@ hp_definition	:	THYPERPROCESS TIDENTIFIER // 1  2
 				;
 
 //process type definition
-proctype_def : TPROCTYPE TIDENTIFIER // 1 2
+proctype_def : TPROCTYPE TIDENTIFIER 
+				TLPAREN TRPAREN 
 				{
-					printf("parser: entered proctype_def rule\n");
+					printf("parser: entered proctype_def without parameters rule\n");
+					//check for proctype redefinition
+					if (ic_program->proctype_defined(*$2)) //todo: replace with parser_context->get_proctype_scope ?
+						parser_context->err_msg("process type redefinition: %s already defined", $2->c_str());
+
+					$<proctype>$ = new iCProcType(*$2, *parser_context);
+					parser_context->set_proctype($<proctype>$); //entering proctype definition
+					parser_context->open_scope(*$2); //enter proctype scope
+					delete $2; //proctype name
+				}
+				TLBRACE proc_body TRBRACE //version without parameters
+				{
+					//proc body has already been parsed - closing process scope
+					parser_context->close_scope();
+
+					//finalize the iCProcType and add it to scope
+					//if a redifinition took place the proctype will have multiple instance in the scope but it's ok
+					$$ = $<proctype>5;
+					$$->add_states(*$7);
+					parser_context->add_proctype_to_scope($$->name);
+
+					//restore context
+					parser_context->set_proctype(NULL); //leaving proctype definition
+					//parser_context->leave_isr(); //todo:uncomment when isr will work
+
+					delete $7; //proc body (list of states) //todo: what's a reason to delete it?
+					$1; $3; $4; $6; $8;
+				}
+				| TPROCTYPE TIDENTIFIER //version with parameters
+				TLPAREN proctype_param_list TRPAREN
+				{
+					printf("parser: entered proctype_def with parameters rule\n");
 					//check for proctype redefinition
 					if (ic_program->proctype_defined(*$2)) //todo: replace with parser_context->get_proctype_scope ?
 						parser_context->err_msg("process type redefinition: %s already defined", $2->c_str());
@@ -466,7 +499,6 @@ proctype_def : TPROCTYPE TIDENTIFIER // 1 2
 					parser_context->open_scope(*$2); //enter proctype scope
 					delete $2; //proctype name //todo: what's a reason to delete it?
 				}
-				TLPAREN TRPAREN
 				TLBRACE proc_body TRBRACE
 				{
 					//proc body has already been parsed - closing process scope
@@ -474,17 +506,38 @@ proctype_def : TPROCTYPE TIDENTIFIER // 1 2
 
 					//finalize the iCProcType and add it to scope
 					//if a redifinition took place the proctype will have multiple instance in the scope but it's ok
-					$$ = $<proctype>3;
-					$$->add_states(*$7);
+					$$ = $<proctype>6;
+					$$->add_states(*$8);
 					parser_context->add_proctype_to_scope($$->name);
 
 					//restore context
 					parser_context->set_proctype(NULL); //leaving proctype definition
 					//parser_context->leave_isr(); //todo:uncomment when isr will work
 
-					delete $7; //proc body (list of states) //todo: what's a reason to delete it?
-					$1;$4;$5;$6;$8;
+					delete $8; //proc body (list of states) //todo: what's a reason to delete it?
+					$1;$3;$5;$7;$9;
 				};
+
+//iCIdentifierList*
+proctype_param_list: proctype_param_list TCOMMA TIDENTIFIER
+					{
+						std::cout << "list id " << (*$3) << std::endl;
+						$$ = $1;
+						const iCScope* scope = parser_context->get_current_scope();
+						iCIdentifier* id = new iCIdentifier(*$3, scope, *parser_context);
+						$$->push_back(id);
+						delete $2;
+						delete $3;
+					}
+					| TIDENTIFIER
+					{
+						std::cout << "one id " << (*$1) << std::endl;
+						$$ = new iCIdentifierList;
+						const iCScope* scope = parser_context->get_current_scope();
+						iCIdentifier* id = new iCIdentifier(*$1, scope, *parser_context);
+						$$->push_back(id);
+					}
+					;
 
 //process type instantiation
 proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
