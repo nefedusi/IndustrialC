@@ -7,9 +7,10 @@ class iCProcType : public iCDeclaration //todo: iCNode instead?
 {
 	iCStateList states;
 	iCVariablesList var_list; //list of defined variables
+	iCIdentifierList param_list; //list of given parameters;
 public:
 	std::string name;
-	iCProcType(const std::string& name, const ParserContext& context);
+	iCProcType(const std::string& name, const iCIdentifierList& param_list, const ParserContext& context);
 	virtual ~iCProcType();
 	void add_states(const iCStateList& states);
 	void add_variable(iCVariable* var)

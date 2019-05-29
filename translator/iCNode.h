@@ -20,7 +20,7 @@ public:
 
 	iCNode(){}
 	iCNode(const ParserContext& context);
-    virtual ~iCNode() {}
+	virtual ~iCNode() {}
 
 	virtual void gen_code(CodeGenContext& context) = 0;
 	virtual void second_pass() {}

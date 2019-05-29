@@ -463,7 +463,8 @@ proctype_def : TPROCTYPE TIDENTIFIER
 					if (ic_program->proctype_defined(*$2)) //todo: replace with parser_context->get_proctype_scope ?
 						parser_context->err_msg("process type redefinition: %s already defined", $2->c_str());
 
-					$<proctype>$ = new iCProcType(*$2, *parser_context);
+					iCIdentifierList* empty_param_list = new iCIdentifierList();
+					$<proctype>$ = new iCProcType(*$2, *empty_param_list, *parser_context);
 					parser_context->set_proctype($<proctype>$); //entering proctype definition
 					parser_context->open_scope(*$2); //enter proctype scope
 					delete $2; //proctype name
@@ -494,7 +495,7 @@ proctype_def : TPROCTYPE TIDENTIFIER
 					if (ic_program->proctype_defined(*$2)) //todo: replace with parser_context->get_proctype_scope ?
 						parser_context->err_msg("process type redefinition: %s already defined", $2->c_str());
 
-					$<proctype>$ = new iCProcType(*$2, *parser_context);
+					$<proctype>$ = new iCProcType(*$2, *$4, *parser_context);
 					parser_context->set_proctype($<proctype>$); //entering proctype definition
 					parser_context->open_scope(*$2); //enter proctype scope
 					delete $2; //proctype name //todo: what's a reason to delete it?
