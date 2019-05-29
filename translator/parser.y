@@ -519,27 +519,6 @@ proctype_def : TPROCTYPE TIDENTIFIER
 					$1;$3;$5;$7;$9;
 				};
 
-//iCIdentifierList*
-proctype_param_list: proctype_param_list TCOMMA TIDENTIFIER
-					{
-						std::cout << "list id " << (*$3) << std::endl;
-						$$ = $1;
-						const iCScope* scope = parser_context->get_current_scope();
-						iCIdentifier* id = new iCIdentifier(*$3, scope, *parser_context);
-						$$->push_back(id);
-						delete $2;
-						delete $3;
-					}
-					| TIDENTIFIER
-					{
-						std::cout << "one id " << (*$1) << std::endl;
-						$$ = new iCIdentifierList;
-						const iCScope* scope = parser_context->get_current_scope();
-						iCIdentifier* id = new iCIdentifier(*$1, scope, *parser_context);
-						$$->push_back(id);
-					}
-					;
-
 //process type instantiation
 proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
 						{
@@ -553,15 +532,59 @@ proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
 									$2->c_str(), scope->name.empty() ? "this scope" : scope->name.c_str());
 							}
 
-							$$ = new iCProcTypeInstantiation(ic_program, *$1, *$2, *parser_context);
+							iCIdentifierList* empty_arg_list = new iCIdentifierList();
+							$$ = new iCProcTypeInstantiation(ic_program, *$1, *$2, *empty_arg_list, *parser_context);
 							$$->set_hp("background"); //todo: other hyperprocesses
 							parser_context->add_to_second_pass($$);
 
 							delete $1;
 							delete $2;
+							//todo: delete empty_arg_list
 							$3; $4; $5;
+						}
+						| TIDENTIFIER TIDENTIFIER TLPAREN proctype_param_list TRPAREN TSEMIC
+						{
+							printf("parser: entered proctype_instantiation rule\n");
+							//check for process redefinition
+							const iCScope* scope = parser_context->get_proc_scope(*$2);
+							if (NULL != scope)
+							{
+								//process already defined - gen error, but continue parsing anyway to check for more errors
+								parser_context->err_msg("process redefinition: %s already defined in %s",
+									$2->c_str(), scope->name.empty() ? "this scope" : scope->name.c_str());
+							}
+
+							$$ = new iCProcTypeInstantiation(ic_program, *$1, *$2, *$4, *parser_context);
+							$$->set_hp("background"); //todo: other hyperprocesses
+							parser_context->add_to_second_pass($$);
+
+							delete $1;
+							delete $2;
+							//todo: delete $4
+							$3; $5; $6;
 						};
-						
+
+//iCIdentifierList*
+proctype_param_list: proctype_param_list TCOMMA TIDENTIFIER
+					{
+						std::cout << "list id " << (*$3) << std::endl;
+						$$ = $1;
+						const iCScope* scope = parser_context->get_current_scope();
+						iCIdentifier* id = new iCIdentifier(*$3, scope, *parser_context);
+						$$->push_back(id);
+						delete $2;
+						delete $3;
+					}
+						| TIDENTIFIER
+					{
+						std::cout << "one id " << (*$1) << std::endl;
+						$$ = new iCIdentifierList;
+						const iCScope* scope = parser_context->get_current_scope();
+						iCIdentifier* id = new iCIdentifier(*$1, scope, *parser_context);
+						$$->push_back(id);
+					}
+					;
+
 //=================================================================================================
 //iCProcess object needs to be created before the states are parsed,
 //so that we have an already opened scope and a process in ParserContext when parsing the states.
