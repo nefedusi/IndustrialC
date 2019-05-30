@@ -1,10 +1,13 @@
 #pragma once
 
 #include "common.h"
+//#include "iCIdentifierInProcType.h"
 
 class iCVariable;
 class CodeGenContext;
 class ParserContext;
+class iCIdentifierInProcType;
+class iCProcTypeParam;
 
 //=================================================================================================
 //Base class for all AST nodes
@@ -64,3 +67,5 @@ typedef std::map<std::string, iCProcess*> iCProcessMap;
 typedef std::vector<iCState*> iCStateList;
 typedef std::list<iCVariable*> iCVariablesList;
 typedef std::list<iCIdentifier*> iCIdentifierList;
+typedef std::list<iCIdentifierInProcType*> iCIdentifierInProcTypeList;
+typedef std::list<iCProcTypeParam*> iCProcTypeParamList;

@@ -1,11 +1,13 @@
 
 %{
 	#include "iCProgram.h"
-	#include "iCScope.h" 
+	#include "iCScope.h"
 	#include "ParserContext.h"
 	#include "iCIdentifier.h"
 	#include "iCMCUIdentifier.h"
 	#include "iCIdentifierInProcType.h"
+	#include "iCProcTypeParam.h"
+	#include "iCProcTypeParamUsage.h"
 	#include "iCProcType.h"
 	#include "iCProcTypeInstantiation.h"
 	#include "iCProcess.h"
@@ -89,6 +91,7 @@
 	iCDeclaration* declaration;
 	iCVariable* variable;
 	iCIdentifierList* ident_list;
+	iCProcTypeParamList* proctype_param_list;
 	iCFunction* func;
 	std::vector<iCExpression*>* expr_list;
 	iCProgramItemsList* program_items_list;
@@ -245,7 +248,8 @@
 %type <variable>			param_declarator
 %type <statement>			for_init_statement
 //%type <token>				for_prep_scope
-%type <ident_list>			proctype_param_list
+%type <ident_list>			ident_list
+%type <proctype_param_list>	proctype_param_list
 
 %type <string>				program_items_list
 %type <string>				program_item
@@ -463,7 +467,7 @@ proctype_def : TPROCTYPE TIDENTIFIER
 					if (ic_program->proctype_defined(*$2)) //todo: replace with parser_context->get_proctype_scope ?
 						parser_context->err_msg("process type redefinition: %s already defined", $2->c_str());
 
-					iCIdentifierList* empty_param_list = new iCIdentifierList();
+					iCProcTypeParamList* empty_param_list = new iCProcTypeParamList();
 					$<proctype>$ = new iCProcType(*$2, *empty_param_list, *parser_context);
 					parser_context->set_proctype($<proctype>$); //entering proctype definition
 					parser_context->open_scope(*$2); //enter proctype scope
@@ -519,6 +523,29 @@ proctype_def : TPROCTYPE TIDENTIFIER
 					$1;$3;$5;$7;$9;
 				};
 
+//iCProcTypeParamList*
+proctype_param_list: proctype_param_list TCOMMA TIDENTIFIER
+			{
+				std::cout << "iCProcTypeParamList list id " << (*$3) << std::endl;
+				$$ = $1;
+				//todo: check if var for such id is defined, if yes then take scope from there
+				const iCScope* scope = parser_context->get_current_scope();
+				iCProcTypeParam* id = new iCProcTypeParam(*$3, scope, *parser_context);
+				$$->push_back(id);
+				delete $2;
+				delete $3;
+			}
+				| TIDENTIFIER
+			{
+				std::cout << "iCProcTypeParamList one id " << (*$1) << std::endl;
+				$$ = new iCProcTypeParamList;
+				//todo: check if var for such id is defined, if yes then take scope from there
+				const iCScope* scope = parser_context->get_current_scope();
+				iCProcTypeParam* id = new iCProcTypeParam(*$1, scope, *parser_context);
+				$$->push_back(id);
+			}
+			;
+
 //process type instantiation
 proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
 						{
@@ -542,7 +569,7 @@ proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
 							//todo: delete empty_arg_list
 							$3; $4; $5;
 						}
-						| TIDENTIFIER TIDENTIFIER TLPAREN proctype_param_list TRPAREN TSEMIC
+						| TIDENTIFIER TIDENTIFIER TLPAREN ident_list TRPAREN TSEMIC
 						{
 							printf("parser: entered proctype_instantiation rule\n");
 							//check for process redefinition
@@ -565,7 +592,7 @@ proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
 						};
 
 //iCIdentifierList*
-proctype_param_list: proctype_param_list TCOMMA TIDENTIFIER
+ident_list: ident_list TCOMMA TIDENTIFIER
 					{
 						std::cout << "list id " << (*$3) << std::endl;
 						$$ = $1;
@@ -1144,14 +1171,14 @@ primary_expr : TTRUE   {$$ = new iCLogicConst(true, *parser_context); $1;}
 								std::cout << "parser.y proctype is not null" << std::endl;
 
 								bool id_is_proctype_param = false;
-								iCIdentifierList params_list = proctype->get_params();
-								for (iCIdentifierList::iterator i = params_list.begin(); i != params_list.end(); i++)
+								iCProcTypeParamList params_list = proctype->get_params();
+								for (iCProcTypeParamList::iterator i = params_list.begin(); i != params_list.end(); i++)
 								{
 									if (0 == (*i)->name.compare(*$1))
 									{
 										std::cout << "id " << *$1 << " is proctype param" << std::endl;
 										//todo: fill scope
-										$$ = new iCIdentifierInProcType(*$1, NULL, *parser_context);
+										$$ = new iCProcTypeParamUsage(*$1, *i, NULL, *parser_context);
 										id_is_proctype_param = true;
 										break;
 									}

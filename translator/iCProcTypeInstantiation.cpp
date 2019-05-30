@@ -4,6 +4,9 @@
 #include "iCProcType.h"
 #include "iCProcess.h"
 #include "iCState.h"
+#include "iCNode.h"
+#include "iCIdentifier.h"
+#include "iCProcTypeParam.h"
 
 iCProcTypeInstantiation::iCProcTypeInstantiation(iCProgram* program, const std::string& proctype_name,
 	const std::string& instance_name, const iCIdentifierList& arg_list, const ParserContext& context)
@@ -39,6 +42,15 @@ void iCProcTypeInstantiation::gen_code(CodeGenContext& context)
 		err_msg("number of arguments in instance %s (%d) isn't equal to number of parameters in proctype %s (%d)",
 			name.c_str(), arg_list.size(), proctype_name.c_str(), proctype->get_params().size());
 		return;
+	}
+
+	//assign process instance arguments to proctype params
+	//todo: should proctype be checked on null? if errmsg work correctly for errors in second_pass then no null check needed
+	iCProcTypeParamList params = proctype->get_params();
+	for (std::pair<iCProcTypeParamList::iterator, iCIdentifierList::iterator> i(params.begin(), arg_list.begin());
+		i.first != params.end(); ++i.first, ++i.second)
+	{
+		(*i.first)->value = (*i.second)->get_scoped_name();
 	}
 
 	iCStateList state_list = proctype->get_states();

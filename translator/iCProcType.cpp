@@ -2,11 +2,11 @@
 #include "CodeGenContext.h"
 #include "ParserContext.h"
 #include "iCNode.h"
-#include "iCIdentifier.h"
+#include "iCProcTypeParam.h"
 #include "iCState.h"
 
-iCProcType::iCProcType(const std::string& name, const iCIdentifierList& param_list, const ParserContext& context)
-	: iCNode(context)
+iCProcType::iCProcType(const std::string& name, const iCProcTypeParamList& param_list,
+	const ParserContext& context): iCNode(context)
 {
 	this->line_num = context.line();
 	this->name = name;
@@ -18,7 +18,7 @@ iCProcType::~iCProcType()
 	for (iCVariablesList::iterator i = var_list.begin(); i != var_list.end(); i++)
 		delete *i;
 
-	for (iCIdentifierList::iterator i = param_list.begin(); i != param_list.end(); i++)
+	for (iCProcTypeParamList::iterator i = param_list.begin(); i != param_list.end(); i++)
 		delete *i;
 
 	for (iCStateList::iterator i = states.begin(); i != states.end(); i++)
