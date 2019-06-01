@@ -43,7 +43,8 @@ public:
 	const iCHyperprocess* get_hp(const std::string& hp_name) const;
 	bool proctype_defined(const std::string& activator);
 	const iCProcType* find_proctype(const std::string& proctype_name) const;
-	bool proctype_instantiation_defined(const std::string& instance_name) const;
+	bool proctype_instance_defined(const std::string& instance_name) const;
+	const iCProcTypeInstantiation* find_proctype_instance(const std::string& instance_name) const;
 	bool proc_defined(const std::string& proctype_name) const;
 	const iCProcess* find_proc(const std::string& proc_name)const;
 	virtual void gen_code(CodeGenContext& context);

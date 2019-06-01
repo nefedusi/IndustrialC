@@ -8,10 +8,8 @@
 //=================================================================================================
 void iCStopProcStatement::second_pass()
 {
-	std::cout << "iCStopProcStatement::second_pass: proc_name="<<proc_name<<
-		", proc=" << program->find_proc(proc_name) << std::endl;
 	//if it's not stopping self process from proctype then check that process was defined
-	if(!proc_name.empty() && !program->proc_defined(proc_name) && !program->proctype_instantiation_defined(proc_name))
+	if(!proc_name.empty() && !program->proc_defined(proc_name) && !program->proctype_instance_defined(proc_name))
 	{
 		err_msg("undefined process %s", proc_name.c_str());
 	}
