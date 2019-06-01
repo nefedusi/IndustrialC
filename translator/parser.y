@@ -472,6 +472,7 @@ proctype_def : TPROCTYPE TIDENTIFIER
 					parser_context->set_proctype($<proctype>$); //entering proctype definition
 					parser_context->open_scope(*$2); //enter proctype scope
 					delete $2; //proctype name
+					delete empty_param_list;
 				}
 				TLBRACE proc_body TRBRACE //version without parameters
 				{
@@ -502,7 +503,8 @@ proctype_def : TPROCTYPE TIDENTIFIER
 					$<proctype>$ = new iCProcType(*$2, *$4, *parser_context);
 					parser_context->set_proctype($<proctype>$); //entering proctype definition
 					parser_context->open_scope(*$2); //enter proctype scope
-					delete $2; //proctype name //todo: what's a reason to delete it?
+					delete $2; //proctype name
+					delete $4; //proctype params
 				}
 				TLBRACE proc_body TRBRACE
 				{
@@ -519,30 +521,36 @@ proctype_def : TPROCTYPE TIDENTIFIER
 					parser_context->set_proctype(NULL); //leaving proctype definition
 					//parser_context->leave_isr(); //todo:uncomment when isr will work
 
-					delete $8; //proc body (list of states) //todo: what's a reason to delete it?
+					delete $8; //proc body (list of states)
 					$1;$3;$5;$7;$9;
 				};
 
 //iCProcTypeParamList*
 proctype_param_list: proctype_param_list TCOMMA TIDENTIFIER
 			{
+				parser_context->check_identifier_defined(*$3);
+
 				$$ = $1;
-				//todo: check if var for such id is defined, if yes then take scope from there
+				//todo: check if var for such id is defined (in proctype?), if yes then take scope from there
 				const iCScope* scope = parser_context->get_current_scope();
 				iCProcTypeParam* id = new iCProcTypeParam(*$3, scope, *parser_context);
 				$$->push_back(id);
+				parser_context->add_proctype_param_to_scope(id);
 				delete $2;
 				delete $3;
 			}
 				| TIDENTIFIER
 			{
+				parser_context->check_identifier_defined(*$1);
+
 				$$ = new iCProcTypeParamList;
 				//todo: check if var for such id is defined, if yes then take scope from there
 				const iCScope* scope = parser_context->get_current_scope();
 				iCProcTypeParam* id = new iCProcTypeParam(*$1, scope, *parser_context);
 				$$->push_back(id);
-			}
-			;
+				parser_context->add_proctype_param_to_scope(id);
+				delete $1;
+			};
 
 //process type instantiation
 proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
@@ -564,7 +572,7 @@ proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
 
 							delete $1;
 							delete $2;
-							//todo: delete empty_arg_list
+							delete empty_arg_list;
 							$3; $4; $5;
 						}
 						| TIDENTIFIER TIDENTIFIER TLPAREN ident_list TRPAREN TSEMIC
@@ -585,14 +593,13 @@ proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
 
 							delete $1;
 							delete $2;
-							//todo: delete $4
+							delete $4;
 							$3; $5; $6;
 						};
 
 //iCIdentifierList*
 ident_list: ident_list TCOMMA TIDENTIFIER
 					{
-						std::cout << "list id " << (*$3) << std::endl;
 						$$ = $1;
 						const iCScope* scope = parser_context->get_current_scope();
 						iCIdentifier* id = new iCIdentifier(*$3, scope, *parser_context);
@@ -602,13 +609,12 @@ ident_list: ident_list TCOMMA TIDENTIFIER
 					}
 						| TIDENTIFIER
 					{
-						std::cout << "one id " << (*$1) << std::endl;
 						$$ = new iCIdentifierList;
 						const iCScope* scope = parser_context->get_current_scope();
 						iCIdentifier* id = new iCIdentifier(*$1, scope, *parser_context);
 						$$->push_back(id);
-					}
-					;
+						delete $1;
+					};
 
 //=================================================================================================
 //iCProcess object needs to be created before the states are parsed,

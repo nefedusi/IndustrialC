@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common.h"
-//#include "iCIdentifierInProcType.h"
 
 class iCVariable;
 class CodeGenContext;

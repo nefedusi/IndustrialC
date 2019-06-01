@@ -16,6 +16,14 @@ iCProcTypeInstantiation::iCProcTypeInstantiation(iCProgram* program, const std::
 		proctype_name.c_str(), instance_name.c_str());
 }
 
+iCProcTypeInstantiation::~iCProcTypeInstantiation()
+{
+	for (iCIdentifierList::iterator i = arg_list.begin(); i != arg_list.end(); i++)
+	{
+		delete *i;
+	}
+}
+
 void iCProcTypeInstantiation::second_pass()
 {
 	//check whether such proctype exists

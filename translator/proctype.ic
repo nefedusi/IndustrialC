@@ -6,12 +6,14 @@ int global3 = 3;
 
 //void myfunc() {}
 
-myproctype proc1 (global1, global2, global3); //OK
-proctype myproctype (m, n, p)
+myproctype proc1(global1, global2, global3); //OK
+proctype myproctype(m, n, p)
 {
-	int a=m+1;
+	//int a=m+1;
 	state FS_START
 	{
+		//int a; //error - already defined in proctype
+		//int m; //errror - already defined in params
 		/*timeout(500)
 		{
 			int a = 1;
@@ -27,7 +29,7 @@ proctype myproctype (m, n, p)
 	state AnotherState
 	{
 		//int h = a + b[2] + 3;
-		stop process;
+		//stop process;
 		//start process Init;
 		//bool init_is_active = Init active;
 		//bool proc1_is_active = proc1 active;
@@ -77,7 +79,7 @@ process Init : background
 	state AnotherState
 	{
 		stop process;
-		start process proc1; //works
+		start process proc1; //sometimes failes
 		restart;
 		bool init_is_active = Init active;
 		//bool proc1_is_active = proc1 active; //doesn't work

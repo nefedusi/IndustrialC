@@ -28,7 +28,6 @@ iCProcType::~iCProcType()
 void iCProcType::add_states(const iCStateList& states)
 {
 	this->states = states;
-	printf("iCProcType.add_states: argument states size=%d, this->states size=%d\n", states.size(), this->states.size());
 	//todo: if (isr_driven) ? (see iCProcess)
 }
 
