@@ -2,7 +2,7 @@
 
 int global1 = 1;
 int global2 = 2;
-int global3 = 2;
+int global3 = 3;
 
 //void myfunc() {}
 
@@ -12,17 +12,25 @@ proctype myproctype (m, n, p)
 	int a=m+1;
 	state FS_START
 	{
-		int d = 1;
+		/*timeout(500)
+		{
+			int a = 1;
+		}*/
+		/*int d = 1;
 		int e = a+1;
 		//int f = c; //c can't be used here, it's still undeclaered
 		int f = d;
 		int g = d + a - 4;
-		int h = m + g + a + 1 + global1 + n + p;
+		int h = m + g + a + 1 + global1 + n + p;*/
 	}
 	//int b[3] = { 1,2,3 };
 	state AnotherState
 	{
 		//int h = a + b[2] + 3;
+		//stop process;
+		//start process Init;
+		//bool init_is_active = Init active;
+		//bool proc1_is_active = proc1 active;
 	}
 	//int c = a + 1 + b[2];
 }
@@ -57,14 +65,22 @@ process Init : background
 	//int a=1;
 	state FS_START
 	{
-		/*int c = a + 3; //b can't be used here, it's still undeclaered
+		/*timeout(global1)
+		{
+			int a = 1;
+		}
+		int c = a + 3; //b can't be used here, it's still undeclaered
 		int d = c + 4;
-		restart;*/
+		*/
 	}
 	//int b=a; //it works
 	state AnotherState
 	{
-
+		stop process;
+		start process proc1; //works
+		restart;
+		bool init_is_active = Init active;
+		//bool proc1_is_active = proc1 active; //doesn't work
 	}
 	//int c = global + b + a + 1;
 }
