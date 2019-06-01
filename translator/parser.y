@@ -526,7 +526,6 @@ proctype_def : TPROCTYPE TIDENTIFIER
 //iCProcTypeParamList*
 proctype_param_list: proctype_param_list TCOMMA TIDENTIFIER
 			{
-				std::cout << "iCProcTypeParamList list id " << (*$3) << std::endl;
 				$$ = $1;
 				//todo: check if var for such id is defined, if yes then take scope from there
 				const iCScope* scope = parser_context->get_current_scope();
@@ -537,7 +536,6 @@ proctype_param_list: proctype_param_list TCOMMA TIDENTIFIER
 			}
 				| TIDENTIFIER
 			{
-				std::cout << "iCProcTypeParamList one id " << (*$1) << std::endl;
 				$$ = new iCProcTypeParamList;
 				//todo: check if var for such id is defined, if yes then take scope from there
 				const iCScope* scope = parser_context->get_current_scope();

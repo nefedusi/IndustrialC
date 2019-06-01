@@ -27,7 +27,7 @@ proctype myproctype (m, n, p)
 	state AnotherState
 	{
 		//int h = a + b[2] + 3;
-		//stop process;
+		stop process;
 		//start process Init;
 		//bool init_is_active = Init active;
 		//bool proc1_is_active = proc1 active;
