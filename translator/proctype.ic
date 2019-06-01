@@ -29,14 +29,17 @@ proctype myproctype(m, n, p)
 	state AnotherState
 	{
 		//int h = a + b[2] + 3;
-		//stop process;
+		stop process;
+		stop process proc1;
+		stop process proc2;
+		stop process Init;
 		//start process Init;
 		//bool init_is_active = Init active;
 		//bool proc1_is_active = proc1 active;
 	}
 	//int c = a + 1 + b[2];
 }
-//myproctype proc2();
+myproctype proc2(global3, global2, global1);
 //myproctype proc1(); //duplicate proc instance
 
 //duplicate proctype
@@ -79,9 +82,12 @@ process Init : background
 	state AnotherState
 	{
 		stop process;
-		start process proc1; //sometimes failes
-		restart;
-		bool init_is_active = Init active;
+		stop process proc1;
+		stop process proc2;
+		stop process Init;
+		//start process proc1; //sometimes fails
+		//restart;
+		//bool init_is_active = Init active;
 		//bool proc1_is_active = proc1 active; //doesn't work
 	}
 	//int c = global + b + a + 1;

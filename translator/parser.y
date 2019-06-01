@@ -389,7 +389,8 @@ program_item	:	var_declaration	//global var declarations
 					}
 				|	proctype_instantiation
 					{
-						$1;
+			//iCProcTypeInstantiation is also added to ic_program as iCProcess in iCProcTypeInstantiation::second_pass()
+						if(NULL!=$1)ic_program->add_proctype_instantiation($1);
 						$$ = NULL;
 					}
 				|	hp_definition // hyperprocess definitions with hp name, vector, register & bit
@@ -568,6 +569,7 @@ proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
 							iCIdentifierList* empty_arg_list = new iCIdentifierList();
 							$$ = new iCProcTypeInstantiation(ic_program, *$1, *$2, *empty_arg_list, *parser_context);
 							$$->set_hp("background"); //todo: other hyperprocesses
+							parser_context->add_proc_to_scope(*$2);
 							parser_context->add_to_second_pass($$);
 
 							delete $1;
@@ -589,6 +591,7 @@ proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
 
 							$$ = new iCProcTypeInstantiation(ic_program, *$1, *$2, *$4, *parser_context);
 							$$->set_hp("background"); //todo: other hyperprocesses
+							parser_context->add_proc_to_scope(*$2);
 							parser_context->add_to_second_pass($$);
 
 							delete $1;
@@ -875,7 +878,8 @@ statement	:	TSET TSTATE TIDENTIFIER TSEMIC //set state <state_name>;
 			|	TSTART TPROC TIDENTIFIER TSEMIC //start process <proc_name>;
 				{
 					const iCProcess* proc = parser_context->get_process();
-					if(NULL == proc)
+					const iCProcType* proctype = parser_context->get_proctype();
+					if(NULL == proc && NULL == proctype)
 					{
 						parser_context->err_msg("start process statement can only be used inside states");
 						$$ = NULL;
@@ -894,14 +898,15 @@ statement	:	TSET TSTATE TIDENTIFIER TSEMIC //set state <state_name>;
 			|	TSTOP TPROC TIDENTIFIER TSEMIC //stop process <proc_name>;
 				{
 					const iCProcess* proc = parser_context->get_process();
-					if(NULL == proc)
+					const iCProcType* proctype = parser_context->get_proctype();
+					if (NULL == proc && NULL == proctype)
 					{
 						parser_context->err_msg("stop process statement can only be used inside states");
 						$$ = NULL;
 					}
 					else
 					{
-						$$ = new iCStopProcStatement(*$3, *parser_context); 
+						$$ = new iCStopProcStatement(*$3, *parser_context);
 						parser_context->add_to_second_pass($$); // to check if process was defined
 
 						//add edge to the process graph (for DOT generation)
@@ -913,15 +918,23 @@ statement	:	TSET TSTATE TIDENTIFIER TSEMIC //set state <state_name>;
 			|	TSTOP TPROC TSEMIC //stop process;
 				{
 					const iCProcess* proc = parser_context->get_process();
-					if(NULL == proc)
+					const iCProcType* proctype = parser_context->get_proctype();
+					if (NULL == proc && NULL == proctype)
 					{
 						parser_context->err_msg("stop process statement can only be used inside states");
 						$$ = NULL;
 					}
 					else
 					{
-						$$ = new iCStopProcStatement(proc->name, *parser_context); 
-						parser_context->add_to_second_pass($$);
+						if (NULL != proc)
+						{
+							$$ = new iCStopProcStatement(proc->name, *parser_context);
+						}
+						else
+						{
+							$$ = new iCStopProcStatement(*parser_context);
+						}
+						parser_context->add_to_second_pass($$); // to check if process was defined
 					}
 					$1;$2;$3;//suppress unused value warning
 				}

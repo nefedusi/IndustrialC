@@ -69,7 +69,7 @@ void iCHyperprocess::gen_timeout_code( CodeGenContext& context )
 //=================================================================================================
 void iCHyperprocess::add_proc(iCProcess* proc)
 {
-	printf("iCHyperprocess add_proc %s\n", proc->name.c_str());
+	//printf("iCHyperprocess add_proc %s\n", proc->name.c_str());
 	if(NULL == proc)
 	{
 		std::cout<<"NULL process in hyperprocess add_proc"<<std::endl;

@@ -7,6 +7,7 @@ class CodeGenContext;
 class ParserContext;
 class iCIdentifierInProcType;
 class iCProcTypeParam;
+class iCProcTypeInstantiation;
 
 //=================================================================================================
 //Base class for all AST nodes
@@ -62,6 +63,7 @@ typedef std::ostringstream iCStream;
 typedef std::list<std::string> iCStringList;
 typedef std::map<std::string, iCHyperprocess*> iCHyperprocessMap;
 typedef std::map<std::string, iCProcType*> iCProctypeMap;
+typedef std::map<std::string, iCProcTypeInstantiation*> iCProctypeInstantiationMap;
 typedef std::map<std::string, iCProcess*> iCProcessMap;
 typedef std::vector<iCState*> iCStateList;
 typedef std::list<iCVariable*> iCVariablesList;

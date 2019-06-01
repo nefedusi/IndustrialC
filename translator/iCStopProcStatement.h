@@ -14,7 +14,8 @@ class iCStopProcStatement : public iCStatement
 public:
 	std::string proc_name;
 	const iCProgram* program; // does not own
-	iCStopProcStatement(const std::string& proc_name, const ParserContext& context);
+	iCStopProcStatement(const std::string& proc_name, const ParserContext& context); //for common case
+	iCStopProcStatement(const ParserContext& context); //for stopping self in proctype when instance name is unknown
 	virtual ~iCStopProcStatement() {}
 	virtual void gen_code(CodeGenContext& context);
 	virtual void second_pass();
