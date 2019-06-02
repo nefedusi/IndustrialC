@@ -862,7 +862,8 @@ c_code		:	TCCODELINE
 statement	:	TSET TSTATE TIDENTIFIER TSEMIC //set state <state_name>;
 				{
 					const iCProcess* proc = parser_context->get_process();
-					if(NULL == proc)
+					const iCProcType* proctype = parser_context->get_proctype();
+					if(NULL == proc && NULL == proctype)
 					{
 						parser_context->err_msg("state transitions can only be used inside states");
 						$$ = NULL;

@@ -53,7 +53,6 @@ void iCProcTypeInstantiation::gen_code(CodeGenContext& context)
 	}
 
 	//assign process instance arguments to proctype params
-	//todo: should proctype be checked on null? if errmsg work correctly for errors in second_pass then no null check needed
 	iCProcTypeParamList params = proctype->get_params();
 	for (std::pair<iCProcTypeParamList::iterator, iCIdentifierList::iterator> i(params.begin(), arg_list.begin());
 		i.first != params.end(); ++i.first, ++i.second)

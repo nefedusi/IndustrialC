@@ -31,6 +31,15 @@ void iCProcType::add_states(const iCStateList& states)
 	//todo: if (isr_driven) ? (see iCProcess)
 }
 
+bool iCProcType::has_state(const std::string& state_name) const
+{
+	//TODO: optimize
+	for (iCStateList::const_iterator i = states.begin(); i != states.end(); i++)
+		if (state_name == (*i)->name)
+			return true;
+	return false;
+}
+
 //const iCStateList& iCProcType::copy_states() const
 //{
 //	iCStateList copied_states;// = states; //copy

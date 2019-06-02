@@ -13,6 +13,7 @@ public:
 	iCProcType(const std::string& name, const iCProcTypeParamList& param_list, const ParserContext& context);
 	~iCProcType();
 	void add_states(const iCStateList& states);
+	bool has_state(const std::string& state_name) const;
 	void add_variable(iCVariable* var)
 	{
 		//std::cout << "iCProcType: entered add_variable " << var->name << std::endl;
