@@ -6,7 +6,7 @@ int global3 = 3;
 
 //void myfunc() {}
 
-myproctype proc1(global1, global2, global3); //OK
+myproctype proc1(proc1, Init, Init); //OK
 proctype myproctype(m, n, p)
 {
 	//int a=m+1;
@@ -56,11 +56,15 @@ proctype myproctype(m, n, p)
 		bool proc2_is_passive = proc2 passive;*/
 
 		//reset timeout;
+
+		start process m;
+		start process n;
+		start process p;
 	}
 	//int c = a + 1 + b[2];
 	//stop process //syntax error - unexpected stop
 }
-myproctype proc2(global3, global2, global1);
+//myproctype proc2(global3, global2, Init);
 //myproctype proc1(); //duplicate proc instance
 
 //duplicate proctype

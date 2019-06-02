@@ -1186,15 +1186,12 @@ primary_expr : TTRUE   {$$ = new iCLogicConst(true, *parser_context); $1;}
 							const iCProcType* proctype = parser_context->get_proctype();
 							if (NULL != proctype)
 							{
-								std::cout << "parser.y proctype is not null" << std::endl;
-
 								bool id_is_proctype_param = false;
 								iCProcTypeParamList params_list = proctype->get_params();
 								for (iCProcTypeParamList::iterator i = params_list.begin(); i != params_list.end(); i++)
 								{
 									if (0 == (*i)->name.compare(*$1))
 									{
-										std::cout << "id " << *$1 << " is proctype param" << std::endl;
 										//todo: fill scope
 										$$ = new iCProcTypeParamUsage(*$1, *i, NULL, *parser_context);
 										id_is_proctype_param = true;

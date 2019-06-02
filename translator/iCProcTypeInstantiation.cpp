@@ -57,7 +57,8 @@ void iCProcTypeInstantiation::gen_code(CodeGenContext& context)
 	for (std::pair<iCProcTypeParamList::iterator, iCIdentifierList::iterator> i(params.begin(), arg_list.begin());
 		i.first != params.end(); ++i.first, ++i.second)
 	{
-		(*i.first)->value = (*i.second)->get_scoped_name();
+		(*i.first)->original_value = (*i.second)->name;
+		(*i.first)->scoped_value = (*i.second)->get_scoped_name();
 	}
 
 	iCStateList state_list = proctype->get_states();

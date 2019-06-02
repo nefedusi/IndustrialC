@@ -19,7 +19,7 @@ class ParserContext
 {
 	const iCProgram* program; //does not own
 	iCProcType* proctype; //does not own
-	iCProcess* process; //does not own
+	iCProcess* process; //non-parameterized process, does not own
 	iCState* state; //does not own
 	iCFunction* func; //does not own
 	iCScope* root_scope; //owns
@@ -96,7 +96,7 @@ public:
 	void add_mcu_decl_to_scope(const std::string& name);
 	void add_func_to_scope(const std::string& func);
 
-	const iCScope* get_proctype_param_scope(const std::string& identifier)const;
+	const iCScope* get_proctype_param_scope(const std::string& identifier)const; //todo: remove?
 	const iCScope* get_var_scope(const std::string& identifier)const;
 	const iCScope* get_mcu_decl_scope(const std::string& mcu_decl)const;
 	const iCScope* get_func_scope(const std::string& func)const;
