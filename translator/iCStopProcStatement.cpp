@@ -8,7 +8,7 @@
 //=================================================================================================
 void iCStopProcStatement::second_pass()
 {
-	//if it's not stopping self process from proctype then check that process was defined
+	//if it's not stopping self process from proctype then check that process has been defined
 	if(!proc_name.empty() && !program->proc_defined(proc_name) && !program->proctype_instance_defined(proc_name))
 	{
 		err_msg("undefined process %s", proc_name.c_str());
@@ -24,6 +24,8 @@ void iCStopProcStatement::gen_code(CodeGenContext& context)
 	context.indent();
 	if (proc_name.empty()) //if it's stopping self process from proctype when process instance name is unknown
 	{
+		//todo: add in_proctype flag
+		//don't assign instance name to proc_name because proc_name should be empty in order to run this code
 		context.to_code_fmt("%s(%s);", C_STOPPROC_MACRO, context.proctype_instantiation->name.c_str());
 	}
 	else

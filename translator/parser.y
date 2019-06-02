@@ -865,7 +865,7 @@ statement	:	TSET TSTATE TIDENTIFIER TSEMIC //set state <state_name>;
 					const iCProcType* proctype = parser_context->get_proctype();
 					if(NULL == proc && NULL == proctype)
 					{
-						parser_context->err_msg("state transitions can only be used inside states");
+						parser_context->err_msg("\"set state\" statement can only be used inside states");
 						$$ = NULL;
 					}
 					else
@@ -882,7 +882,7 @@ statement	:	TSET TSTATE TIDENTIFIER TSEMIC //set state <state_name>;
 					const iCProcType* proctype = parser_context->get_proctype();
 					if(NULL == proc && NULL == proctype)
 					{
-						parser_context->err_msg("start process statement can only be used inside states");
+						parser_context->err_msg("\"start process\" statement can only be used inside states");
 						$$ = NULL;
 					}
 					else
@@ -902,7 +902,7 @@ statement	:	TSET TSTATE TIDENTIFIER TSEMIC //set state <state_name>;
 					const iCProcType* proctype = parser_context->get_proctype();
 					if (NULL == proc && NULL == proctype)
 					{
-						parser_context->err_msg("stop process statement can only be used inside states");
+						parser_context->err_msg("\"stop process\" statement can only be used inside states");
 						$$ = NULL;
 					}
 					else
@@ -922,7 +922,7 @@ statement	:	TSET TSTATE TIDENTIFIER TSEMIC //set state <state_name>;
 					const iCProcType* proctype = parser_context->get_proctype();
 					if (NULL == proc && NULL == proctype)
 					{
-						parser_context->err_msg("stop process statement can only be used inside states");
+						parser_context->err_msg("\"stop process\" statement can only be used inside states");
 						$$ = NULL;
 					}
 					else
@@ -959,7 +959,7 @@ statement	:	TSET TSTATE TIDENTIFIER TSEMIC //set state <state_name>;
 					const iCProcess* proc = parser_context->get_process();
 					if(NULL == proc)
 					{
-						parser_context->err_msg("stop hyperprocess statement can only be used inside states");
+						parser_context->err_msg("\"stop hyperprocess\" statement can only be used inside states");
 						$$ = NULL;
 					}
 					else

@@ -48,14 +48,17 @@ proctype myproctype(m, n, p)
 
 		//restart;
 
-		bool init_is_active = Init active;
+		/*bool init_is_active = Init active;
 		bool proc1_is_active = proc1 active;
 		bool proc2_is_active = proc2 active;
 		bool init_is_passive = Init passive;
 		bool proc1_is_passive = proc1 passive;
-		bool proc2_is_passive = proc2 passive;
+		bool proc2_is_passive = proc2 passive;*/
+
+		reset timeout;
 	}
 	//int c = a + 1 + b[2];
+	//stop process //syntax error - unexpected stop
 }
 myproctype proc2(global3, global2, global1);
 //myproctype proc1(); //duplicate proc instance
@@ -117,13 +120,16 @@ process Init : background
 
 		//restart;
 
-		bool init_is_active = Init active;
+		/*bool init_is_active = Init active;
 		bool proc1_is_active = proc1 active;
 		bool proc2_is_active = proc2 active;
 		bool init_is_passive = Init passive;
 		bool proc1_is_passive = proc1 passive;
-		bool proc2_is_passive = proc2 passive;
+		bool proc2_is_passive = proc2 passive;*/
+
+		reset timeout;
 	}
+	//stop process //syntax error - unexpected stop
 	//int c = global + b + a + 1;
 }
 
