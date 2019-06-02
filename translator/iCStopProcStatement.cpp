@@ -22,10 +22,8 @@ void iCStopProcStatement::gen_code(CodeGenContext& context)
 {
 	context.set_location(line_num, filename);
 	context.indent();
-	if (proc_name.empty()) //if it's stopping self process from proctype when process instance name is unknown
+	if (stop_self_in_proctype) //if it's stopping self process from proctype when process instance name is unknown
 	{
-		//todo: add in_proctype flag
-		//don't assign instance name to proc_name because proc_name should be empty in order to run this code
 		context.to_code_fmt("%s(%s);", C_STOPPROC_MACRO, context.proctype_instantiation->name.c_str());
 	}
 	else
@@ -56,5 +54,6 @@ iCStopProcStatement::iCStopProcStatement(const ParserContext& context)
 	iCNode(context),
 	in_isr(context.in_isr())
 {
+	stop_self_in_proctype = true;
 	line_num = context.line();
 }

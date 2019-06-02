@@ -11,6 +11,7 @@ class iCProgram;
 class iCStopProcStatement : public iCStatement
 {
 	bool in_isr;
+	bool stop_self_in_proctype = false; //for stopping self in proctype when instance name is unknown
 public:
 	std::string proc_name;
 	const iCProgram* program; // does not own

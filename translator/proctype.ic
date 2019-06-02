@@ -40,8 +40,8 @@ proctype myproctype(m, n, p)
 		stop process Init;
 		start process proc1;
 		start process proc2;
-
 		start process Init;*/
+
 		/*set state FS_START;
 		set state AnotherState;*/
 		//set state UnexistingState; //error - undefined state UnexistingState
@@ -55,7 +55,7 @@ proctype myproctype(m, n, p)
 		bool proc1_is_passive = proc1 passive;
 		bool proc2_is_passive = proc2 passive;*/
 
-		reset timeout;
+		//reset timeout;
 	}
 	//int c = a + 1 + b[2];
 	//stop process //syntax error - unexpected stop
@@ -127,7 +127,7 @@ process Init : background
 		bool proc1_is_passive = proc1 passive;
 		bool proc2_is_passive = proc2 passive;*/
 
-		reset timeout;
+		//reset timeout;
 	}
 	//stop process //syntax error - unexpected stop
 	//int c = global + b + a + 1;
