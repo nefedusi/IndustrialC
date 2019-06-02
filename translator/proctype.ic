@@ -25,28 +25,35 @@ proctype myproctype(m, n, p)
 		int g = d + a - 4;
 		int h = m + g + a + 1 + global1 + n + p;*/
 
-		set state FS_START;
-		set state AnotherState;
+		/*set state FS_START;
+		set state AnotherState;*/
 		//set state UnexistingState; //error - undefined state UnexistingState
 	}
 	//int b[3] = { 1,2,3 };
 	state AnotherState
 	{
-		set state FS_START;
-		set state AnotherState;
-		//set state UnexistingState; //error - undefined state UnexistingState
-
 		//int h = a + b[2] + 3;
+
 		/*stop process;
 		stop process proc1;
 		stop process proc2;
 		stop process Init;
 		start process proc1;
 		start process proc2;
+
 		start process Init;*/
+		/*set state FS_START;
+		set state AnotherState;*/
+		//set state UnexistingState; //error - undefined state UnexistingState
+
 		//restart;
-		//bool init_is_active = Init active;
-		//bool proc1_is_active = proc1 active;
+
+		bool init_is_active = Init active;
+		bool proc1_is_active = proc1 active;
+		bool proc2_is_active = proc2 active;
+		bool init_is_passive = Init passive;
+		bool proc1_is_passive = proc1 passive;
+		bool proc2_is_passive = proc2 passive;
 	}
 	//int c = a + 1 + b[2];
 }
@@ -81,8 +88,8 @@ process Init : background
 	//int a=1;
 	state FS_START
 	{
-		set state FS_START;
-		set state AnotherState;
+		/*set state FS_START;
+		set state AnotherState;*/
 		//set state UnexistingState; //error - undefined state UnexistingState
 
 		/*timeout(global1)
@@ -104,13 +111,18 @@ process Init : background
 		start process proc2;
 		start process Init;*/
 
-		set state FS_START;
-		set state AnotherState;
+		/*set state FS_START;
+		set state AnotherState;*/
 		//set state UnexistingState; //error - undefined state UnexistingState
 
 		//restart;
-		//bool init_is_active = Init active;
-		//bool proc1_is_active = proc1 active; //doesn't work
+
+		bool init_is_active = Init active;
+		bool proc1_is_active = proc1 active;
+		bool proc2_is_active = proc2 active;
+		bool init_is_passive = Init passive;
+		bool proc1_is_passive = proc1 passive;
+		bool proc2_is_passive = proc2 passive;
 	}
 	//int c = global + b + a + 1;
 }

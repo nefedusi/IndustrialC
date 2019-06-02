@@ -9,18 +9,18 @@
 //=================================================================================================
 void iCStartProcStatement::second_pass()
 {
+	//check that process has been defined
 	proc = program->find_proc(proc_name);
-	if (NULL == proc)
+	if (NULL == proc) //if not found among non-parameterized processes then search among parameterized
 	{
 		proc = program->find_proctype_instance(proc_name);
 	}
 
-	//check that process has been defined
 	if (NULL == proc)
 	{
 		err_msg("undefined process %s", proc_name.c_str());
 	}
-	else if(in_isr)
+	else if (in_isr)
 	{
 		proc->mark_isr_referenced();
 	}
