@@ -3,21 +3,18 @@
 int global1 = 1;
 int global2 = 2;
 int global3 = 3;
+double global4 = 4.5;
 
 //void myfunc() {}
 
-myproctype proc1(proc1, Init, Init); //OK
-proctype myproctype(m, n, p)
+myproctype proc1(proc1, Init, proc2, global1); //OK
+proctype myproctype(m, n, p, t)
 {
 	//int a=m+1;
 	state FS_START
 	{
 		//int a; //error - already defined in proctype
 		//int m; //errror - already defined in params
-		/*timeout(500)
-		{
-			int a = 1;
-		}*/
 		/*int d = 1;
 		int e = a+1;
 		//int f = c; //c can't be used here, it's still undeclaered
@@ -57,14 +54,19 @@ proctype myproctype(m, n, p)
 
 		//reset timeout;
 
-		start process m;
+		/*start process m;
 		start process n;
-		start process p;
+		start process p;*/
+
+		timeout(t)
+		{
+			int a = 1;
+		}
 	}
 	//int c = a + 1 + b[2];
 	//stop process //syntax error - unexpected stop
 }
-//myproctype proc2(global3, global2, Init);
+myproctype proc2(proc1, Init, Init, global4);
 //myproctype proc1(); //duplicate proc instance
 
 //duplicate proctype
@@ -99,11 +101,7 @@ process Init : background
 		set state AnotherState;*/
 		//set state UnexistingState; //error - undefined state UnexistingState
 
-		/*timeout(global1)
-		{
-			int a = 1;
-		}
-		int c = a + 3; //b can't be used here, it's still undeclaered
+		/*int c = a + 3; //b can't be used here, it's still undeclaered
 		int d = c + 4;
 		*/
 	}
@@ -132,6 +130,14 @@ process Init : background
 		bool proc2_is_passive = proc2 passive;*/
 
 		//reset timeout;
+
+		timeout(global1)
+		{
+			int a = 1;
+			start process Init;
+			start process proc1;
+			stop process;
+		}
 	}
 	//stop process //syntax error - unexpected stop
 	//int c = global + b + a + 1;
