@@ -12,6 +12,7 @@ class iCStartProcStatement : public iCStatement
 {
 	bool in_isr;
 	bool proc_is_proctype_param = false;
+	//todo: instead of storing proctype_param store proc_name_id which can be param or not and call its "get_value"
 	const iCProcTypeParam *proctype_param = NULL; //where to take value from if started_proc_name is proctype param
 public:
 	std::string started_proc_name; 

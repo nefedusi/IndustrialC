@@ -39,8 +39,8 @@ void iCStartProcStatement::gen_code(CodeGenContext& context)
 	if (proc_is_proctype_param)
 	{
 		started_proc = program->find_proc(proctype_param->original_value);
-		//on gen_code stage all procs (parameterized and non-parameterized) are contained in program,
-		//so there is no need to search proctype instances in program separately
+		//on gen_code stage all procs (parameterized and non-parameterized) are assuredly contained in program,
+		//so there is no need to search proctype instances in program separately (in proctype_instantiations)
 		if (NULL == started_proc)
 		{
 			err_msg("undefined process %s", proctype_param->original_value.c_str());

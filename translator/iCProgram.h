@@ -21,6 +21,7 @@ class iCProgram : public iCNode
 	iCProctypeMap proctypes; //map of all proctypes
 
 	//defined instances (still unchecked on proctype existing) for statements like "start process <inst_name>"
+	//todo: replace with instantiations in parser context and gencode context
 	iCProctypeInstantiationMap proctype_instantiations;
 
 	iCDeclarationList mcu_decls;//vector/register/bit name definitions

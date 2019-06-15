@@ -58,10 +58,19 @@ proctype myproctype(m, n, p, t)
 		start process n;
 		start process p;*/
 
-		timeout(t)
+		/*timeout(t)
 		{
 			int a = 1;
-		}
+		}*/
+
+		/*if (n active && p passive)
+		{
+			int a = 1;
+		}*/
+
+		stop process p;
+		stop process Init;
+		stop process;
 	}
 	//int c = a + 1 + b[2];
 	//stop process //syntax error - unexpected stop
@@ -137,6 +146,7 @@ process Init : background
 			start process Init;
 			start process proc1;
 			stop process;
+			stop process proc2;
 		}
 	}
 	//stop process //syntax error - unexpected stop
