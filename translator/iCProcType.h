@@ -5,20 +5,18 @@
 
 class iCProcType : public iCDeclaration //todo: iCNode instead?
 {
-	iCStateList states;
-	iCVariablesList var_list; //list of defined variables
+	iCStateList states; //owns
+	iCVariablesList var_list; //list of defined variables (owns)
+	iCProcTypeParamList param_list; //list of given parameters (owns)
 public:
 	std::string name;
-	iCProcType(const std::string& name, const ParserContext& context);
-	virtual ~iCProcType();
+	iCProcType(const std::string& name, const iCProcTypeParamList& param_list, const ParserContext& context);
+	~iCProcType();
 	void add_states(const iCStateList& states);
-	void add_variable(iCVariable* var)
-	{
-		std::cout << "iCProcType: entered add_variable " << var->name << std::endl;
-		var_list.push_back(var);
-	}
-	//const iCStateList& copy_states() const;
-	const iCStateList& get_states() const { printf("iCProctype get_states called\n"); return states; }
-	const iCVariablesList& get_variables() const { printf("iCProctype get_variables called\n"); return var_list; }
+	bool has_state(const std::string& state_name) const;
+	void add_variable(iCVariable* var) { var_list.push_back(var); }
+	const iCStateList& get_states() const { return states; }
+	const iCVariablesList& get_variables() const { return var_list; }
+	const iCProcTypeParamList& get_params() const { return param_list; }
 	virtual void gen_code(CodeGenContext& context); //todo: remove gen_code
 };

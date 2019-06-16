@@ -1,0 +1,62 @@
+#include "atmega168.ih"
+
+proctype Blink(pin_num, on_time, off_time)
+{
+	state FS_START
+	{
+		DDRB |= (1 << pin_num);
+		PORTB |= (1 << pin_num);
+		set state On;
+	}
+	state On
+	{
+		timeout(on_time)
+		{
+			PORTB &= ~(1 << pin_num);
+			set state Off;
+		}
+	}
+	state Off
+	{
+		timeout(off_time)
+		{
+			PORTB |= (1 << pin_num);
+			set state On;
+		}
+	}
+}
+
+int led1_on_time = 100;
+int led1_off_time = 200;
+int led1_pin_num = 0;
+int led2_on_time = 200;
+int led2_off_time = 400;
+int led2_pin_num = 1;
+int led3_on_time = 400;
+int led3_off_time = 800;
+int led3_pin_num = 2;
+int led4_on_time = 800;
+int led4_off_time = 1600;
+int led4_pin_num = 3;
+int led5_on_time = 1600;
+int led5_off_time = 3200;
+int led5_pin_num = 4;
+
+Blink Led1Blink(led1_pin_num, led1_on_time, led1_off_time);
+Blink Led2Blink(led2_pin_num, led2_on_time, led2_off_time);
+Blink Led3Blink(led3_pin_num, led3_on_time, led3_off_time);
+Blink Led4Blink(led4_pin_num, led4_on_time, led4_off_time);
+Blink Led5Blink(led5_pin_num, led5_on_time, led5_off_time);
+
+process Init : background
+{
+	state FS_START
+	{
+		start process Led1Blink;
+		start process Led2Blink;
+		start process Led3Blink;
+		start process Led4Blink;
+		start process Led5Blink;
+		stop process;
+	}
+}

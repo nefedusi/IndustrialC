@@ -228,6 +228,21 @@ void iCProgram::add_proctype(iCProcType* proctype)
     //printf("proctypes size=%d\n", proctypes.size());
 }
 
+void iCProgram::add_proctype_instantiation(iCProcTypeInstantiation* instantiation)
+{
+	if (NULL == instantiation)
+	{
+		std::cout << "iCProgram::add_proctype_instantiation: NULL instantiation" << std::endl;
+		return;
+	}
+
+	//todo: uncomment and check this
+	/*if (NULL == first_bkgrnd_process && 0 == instantiation->activator.compare("background"))
+		first_bkgrnd_process = instantiation;*/
+
+	proctype_instantiations[instantiation->name] = instantiation;
+}
+
 //=================================================================================================
 //
 //=================================================================================================
@@ -278,6 +293,21 @@ const iCProcType* iCProgram::find_proctype(const std::string& proctype_name) con
 		return NULL;
 	}
 	return proctype->second;
+}
+
+bool iCProgram::proctype_instance_defined(const std::string& instance_name) const
+{
+	return proctype_instantiations.end() != proctype_instantiations.find(instance_name);
+}
+
+const iCProcTypeInstantiation* iCProgram::find_proctype_instance(const std::string& instance_name) const
+{
+	iCProctypeInstantiationMap::const_iterator instance = proctype_instantiations.find(instance_name);
+	if (proctype_instantiations.end() == instance)
+	{
+		return NULL;
+	}
+	return instance->second;
 }
 
 bool iCProgram::proc_defined(const std::string& proc_name) const

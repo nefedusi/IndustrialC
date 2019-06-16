@@ -17,3 +17,5 @@
 /translator/prep_tokens.cpp
 /translator/tokens.cpp
 /.vs
+/translator/atmega2560n.ih
+/translator/atmega168old.ih

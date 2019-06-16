@@ -51,7 +51,10 @@ iCJumpStatement.cpp ^
 iCResetTimeoutStatement.cpp ^
 iCCastExpression.cpp ^
 iCRestartStatement.cpp ^
-iCProcTypeInstantiation.cpp
+iCProcTypeInstantiation.cpp ^
+iCIdentifierInProcType.cpp ^
+iCProcTypeParam.cpp ^
+iCProcTypeParamUsage.cpp
 @echo --------------------------------Done-------------------------------------
 
  

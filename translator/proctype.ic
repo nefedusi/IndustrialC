@@ -1,28 +1,81 @@
 #define F_CPU 16000000L
 
-int global;
+int global1 = 1;
+int global2 = 2;
+int global3 = 3;
+double global4 = 4.5;
+
 //void myfunc() {}
 
-myproctype proc1 (); //OK
-proctype myproctype ()
+myproctype proc1(proc1, Init, proc2, global1); //OK
+proctype myproctype(m, n, p, t)
 {
-	int a=1;
+	//int a=m+1;
 	state FS_START
 	{
-		int d = 1;
+		//int a; //error - already defined in proctype
+		//int m; //errror - already defined in params
+		/*int d = 1;
 		int e = a+1;
 		//int f = c; //c can't be used here, it's still undeclaered
 		int f = d;
 		int g = d + a - 4;
+		int h = m + g + a + 1 + global1 + n + p;*/
+
+		/*set state FS_START;
+		set state AnotherState;*/
+		//set state UnexistingState; //error - undefined state UnexistingState
 	}
-	int b[3] = { 1,2,3 };
+	//int b[3] = { 1,2,3 };
 	state AnotherState
 	{
-		int h = a + b[2] + 3;
+		//int h = a + b[2] + 3;
+
+		/*stop process;
+		stop process proc1;
+		stop process proc2;
+		stop process Init;
+		start process proc1;
+		start process proc2;
+		start process Init;*/
+
+		/*set state FS_START;
+		set state AnotherState;*/
+		//set state UnexistingState; //error - undefined state UnexistingState
+
+		//restart;
+
+		/*bool init_is_active = Init active;
+		bool proc1_is_active = proc1 active;
+		bool proc2_is_active = proc2 active;
+		bool init_is_passive = Init passive;
+		bool proc1_is_passive = proc1 passive;
+		bool proc2_is_passive = proc2 passive;*/
+
+		//reset timeout;
+
+		/*start process m;
+		start process n;
+		start process p;*/
+
+		/*timeout(t)
+		{
+			int a = 1;
+		}*/
+
+		/*if (n active && p passive)
+		{
+			int a = 1;
+		}*/
+
+		stop process p;
+		stop process Init;
+		stop process;
 	}
-	int c = a + 1 + b[2];
+	//int c = a + 1 + b[2];
+	//stop process //syntax error - unexpected stop
 }
-myproctype proc2();
+myproctype proc2(proc1, Init, Init, global4);
 //myproctype proc1(); //duplicate proc instance
 
 //duplicate proctype
@@ -50,19 +103,54 @@ anotherproctype aproc2();*/
 
 process Init : background
 {
-	int a=1;
+	//int a=1;
 	state FS_START
 	{
-		int c = a + 3; //b can't be used here, it's still undeclaered
+		/*set state FS_START;
+		set state AnotherState;*/
+		//set state UnexistingState; //error - undefined state UnexistingState
+
+		/*int c = a + 3; //b can't be used here, it's still undeclaered
 		int d = c + 4;
-		restart;
+		*/
 	}
-	int b=a; //it works
+	//int b=a; //it works
 	state AnotherState
 	{
+		/*stop process;
+		stop process proc1;
+		stop process proc2;
+		stop process Init;
+		start process proc1;
+		start process proc2;
+		start process Init;*/
 
+		/*set state FS_START;
+		set state AnotherState;*/
+		//set state UnexistingState; //error - undefined state UnexistingState
+
+		//restart;
+
+		/*bool init_is_active = Init active;
+		bool proc1_is_active = proc1 active;
+		bool proc2_is_active = proc2 active;
+		bool init_is_passive = Init passive;
+		bool proc1_is_passive = proc1 passive;
+		bool proc2_is_passive = proc2 passive;*/
+
+		//reset timeout;
+
+		timeout(global1)
+		{
+			int a = 1;
+			start process Init;
+			start process proc1;
+			stop process;
+			stop process proc2;
+		}
 	}
-	int c = global + b + a + 1;
+	//stop process //syntax error - unexpected stop
+	//int c = global + b + a + 1;
 }
 
 //myproctype Init(); //duplicate with non-parameterized process

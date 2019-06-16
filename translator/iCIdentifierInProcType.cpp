@@ -1,16 +1,17 @@
 #include "iCIdentifierInProcType.h"
 #include "CodeGenContext.h"
-#include "iCScope.h"
 
-//todo: what is going on? undefined reference to vtable for iCIdentifierInProcType
-/*void iCIdentifierInProcType::gen_code(CodeGenContext& context)
+void iCIdentifierInProcType::gen_code(CodeGenContext& context)
 {
-	std::cout << "iCIdentifierInProcType.gen_code called, name" << name << std::endl;
-	context.set_location(line_num, filename);
+	std::cout << "iCIdentifierInProcType.gen_code called, name=" << name << std::endl;
+	context.set_location(line_num, filename); //todo: remove?
 
-	if (NULL != scope && !scope->name.empty())
+	//context should assuredly have proctype_instantiation here, otherwise there's error in translator
+	if (NULL == context.proctype_instantiation)
 	{
-		context.to_code_fmt("%s_", scope->name.c_str());
+		err_msg("no proctype_instantiation found in the code gen context");
+		return;
 	}
-	context.to_code_fmt(name.c_str());
-}*/
+	std::cout << "iCIdentifierInProcType.gen_code proctype name=" << context.proctype_instantiation->name << std::endl;
+	context.to_code_fmt("%s_%s", context.proctype_instantiation->name.c_str(), name.c_str());
+}

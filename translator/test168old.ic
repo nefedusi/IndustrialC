@@ -1,0 +1,162 @@
+#include "atmega168.ih"
+
+#define F_CPU 16000000L
+
+process Init : background
+{
+	state FS_START
+	{
+		start process Led1Blink;
+		start process Led2Blink;
+		start process Led3Blink;
+		start process Led4Blink;
+		start process Led5Blink;
+		stop process;
+	}
+}
+
+int led1_on_time = 100;
+int led1_off_time = 200;
+int led1_pin_num = 0;
+int led2_on_time = 200;
+int led2_off_time = 400;
+int led2_pin_num = 1;
+int led3_on_time = 400;
+int led3_off_time = 800;
+int led3_pin_num = 2;
+int led4_on_time = 800;
+int led4_off_time = 1600;
+int led4_pin_num = 3;
+int led5_on_time = 1600;
+int led5_off_time = 3200;
+int led5_pin_num = 4;
+
+process Led1Blink : background
+{
+	state FS_START
+	{
+		DDRB |= (1 << led1_pin_num);
+		PORTB |= (1 << led1_pin_num);
+		set state On;
+	}
+	state On
+	{
+		timeout(led1_on_time)
+		{
+			PORTB &= ~(1 << led1_pin_num);
+			set state Off;
+		}
+	}
+	state Off
+	{
+		timeout(led1_off_time)
+		{
+			PORTB |= (1 << led1_pin_num);
+			set state On;
+		}
+	}
+}
+
+process Led2Blink : background
+{
+	state FS_START
+	{
+		DDRB |= (1 << led2_pin_num);
+		PORTB |= (1 << led2_pin_num);
+		set state On;
+	}
+	state On
+	{
+		timeout(led2_on_time)
+		{
+			PORTB &= ~(1 << led2_pin_num);
+			set state Off;
+		}
+	}
+	state Off
+	{
+		timeout(led2_off_time)
+		{
+			PORTB |= (1 << led2_pin_num);
+			set state On;
+		}
+	}
+}
+
+process Led3Blink : background
+{
+	state FS_START
+	{
+		DDRB |= (1 << led3_pin_num);
+		PORTB |= (1 << led3_pin_num);
+		set state On;
+	}
+	state On
+	{
+		timeout(led3_on_time)
+		{
+			PORTB &= ~(1 << led3_pin_num);
+			set state Off;
+		}
+	}
+	state Off
+	{
+		timeout(led3_off_time)
+		{
+			PORTB |= (1 << led3_pin_num);
+			set state On;
+		}
+	}
+}
+
+process Led4Blink : background
+{
+	state FS_START
+	{
+		DDRB |= (1 << led4_pin_num);
+		PORTB |= (1 << led4_pin_num);
+		set state On;
+	}
+	state On
+	{
+		timeout(led4_on_time)
+		{
+			PORTB &= ~(1 << led4_pin_num);
+			set state Off;
+		}
+	}
+	state Off
+	{
+		timeout(led4_off_time)
+		{
+			PORTB |= (1 << led4_pin_num);
+			set state On;
+		}
+	}
+}
+
+process Led5Blink : background
+{
+	state FS_START
+	{
+		DDRB |= (1 << led5_pin_num);
+		PORTB |= (1 << led5_pin_num);
+		set state On;
+	}
+	state On
+	{
+		timeout(led5_on_time)
+		{
+			PORTB &= ~(1 << led5_pin_num);
+			set state Off;
+		}
+	}
+	state Off
+	{
+		timeout(led5_off_time)
+		{
+			PORTB |= (1 << led5_pin_num);
+			set state On;
+		}
+	}
+}

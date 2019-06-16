@@ -23,7 +23,6 @@ iCVariable::iCVariable( const std::string& name,
 //=================================================================================================
 void iCVariable::gen_code( CodeGenContext& context )
 {
-	std::cout << "iCVariable::gen_code for " << name << std::endl;
 #ifdef ICDEBUG_TRACE
 	std::cout<<"iCVariable::gen_code " << name << "...";
 	std::cout.flush();
@@ -46,10 +45,8 @@ void iCVariable::gen_code( CodeGenContext& context )
 		context.to_code("]");
 	}
 
-	std::cout << "iCVariable.gen_code: decl_initializer="<< decl_initializer << std::endl;
 	if(NULL != decl_initializer)
 	{
-		std::cout << "iCVariable.gen_code: decl_initializer is not null" << std::endl;
 		context.to_code(" = ");
 		decl_initializer->gen_code(context);
 	}
@@ -59,7 +56,6 @@ void iCVariable::gen_code( CodeGenContext& context )
 	std::cout<<"done iCVariable\n";
 	std::cout.flush();
 #endif
-	std::cout << "iCVariable gen_code ended for " << name << std::endl;
 }
 
 //=================================================================================================

@@ -1,11 +1,13 @@
 
 %{
 	#include "iCProgram.h"
-	#include "iCScope.h" 
+	#include "iCScope.h"
 	#include "ParserContext.h"
 	#include "iCIdentifier.h"
 	#include "iCMCUIdentifier.h"
 	#include "iCIdentifierInProcType.h"
+	#include "iCProcTypeParam.h"
+	#include "iCProcTypeParamUsage.h"
 	#include "iCProcType.h"
 	#include "iCProcTypeInstantiation.h"
 	#include "iCProcess.h"
@@ -89,6 +91,7 @@
 	iCDeclaration* declaration;
 	iCVariable* variable;
 	iCIdentifierList* ident_list;
+	iCProcTypeParamList* proctype_param_list;
 	iCFunction* func;
 	std::vector<iCExpression*>* expr_list;
 	iCProgramItemsList* program_items_list;
@@ -245,6 +248,8 @@
 %type <variable>			param_declarator
 %type <statement>			for_init_statement
 //%type <token>				for_prep_scope
+%type <ident_list>			ident_list
+%type <proctype_param_list>	proctype_param_list
 
 %type <string>				program_items_list
 %type <string>				program_item
@@ -384,7 +389,9 @@ program_item	:	var_declaration	//global var declarations
 					}
 				|	proctype_instantiation
 					{
-						$1;
+						//iCProcTypeInstantiation will be also added to ic_program as iCProcess 
+						// in iCProcTypeInstantiation::second_pass()
+						if(NULL!=$1)ic_program->add_proctype_instantiation($1);
 						$$ = NULL;
 					}
 				|	hp_definition // hyperprocess definitions with hp name, vector, register & bit
@@ -454,27 +461,29 @@ hp_definition	:	THYPERPROCESS TIDENTIFIER // 1  2
 				;
 
 //process type definition
-proctype_def : TPROCTYPE TIDENTIFIER // 1 2
+proctype_def : TPROCTYPE TIDENTIFIER 
+				TLPAREN TRPAREN 
 				{
-					printf("parser: entered proctype_def rule\n");
+					printf("parser: entered proctype_def without parameters rule\n");
 					//check for proctype redefinition
 					if (ic_program->proctype_defined(*$2)) //todo: replace with parser_context->get_proctype_scope ?
 						parser_context->err_msg("process type redefinition: %s already defined", $2->c_str());
 
-					$<proctype>$ = new iCProcType(*$2, *parser_context);
+					iCProcTypeParamList* empty_param_list = new iCProcTypeParamList();
+					$<proctype>$ = new iCProcType(*$2, *empty_param_list, *parser_context);
 					parser_context->set_proctype($<proctype>$); //entering proctype definition
 					parser_context->open_scope(*$2); //enter proctype scope
-					delete $2; //proctype name //todo: what's a reason to delete it?
+					delete $2; //proctype name
+					delete empty_param_list;
 				}
-				TLPAREN TRPAREN
-				TLBRACE proc_body TRBRACE
+				TLBRACE proc_body TRBRACE //version without parameters
 				{
 					//proc body has already been parsed - closing process scope
 					parser_context->close_scope();
 
 					//finalize the iCProcType and add it to scope
 					//if a redifinition took place the proctype will have multiple instance in the scope but it's ok
-					$$ = $<proctype>3;
+					$$ = $<proctype>5;
 					$$->add_states(*$7);
 					parser_context->add_proctype_to_scope($$->name);
 
@@ -483,8 +492,67 @@ proctype_def : TPROCTYPE TIDENTIFIER // 1 2
 					//parser_context->leave_isr(); //todo:uncomment when isr will work
 
 					delete $7; //proc body (list of states) //todo: what's a reason to delete it?
-					$1;$4;$5;$6;$8;
+					$1; $3; $4; $6; $8;
+				}
+				| TPROCTYPE TIDENTIFIER //version with parameters
+				TLPAREN proctype_param_list TRPAREN
+				{
+					printf("parser: entered proctype_def with parameters rule\n");
+					//check for proctype redefinition
+					if (ic_program->proctype_defined(*$2)) //todo: replace with parser_context->get_proctype_scope ?
+						parser_context->err_msg("process type redefinition: %s already defined", $2->c_str());
+
+					$<proctype>$ = new iCProcType(*$2, *$4, *parser_context);
+					parser_context->set_proctype($<proctype>$); //entering proctype definition
+					parser_context->open_scope(*$2); //enter proctype scope
+					delete $2; //proctype name
+					delete $4; //proctype params
+				}
+				TLBRACE proc_body TRBRACE
+				{
+					//proc body has already been parsed - closing process scope
+					parser_context->close_scope();
+
+					//finalize the iCProcType and add it to scope
+					//if a redifinition took place the proctype will have multiple instance in the scope but it's ok
+					$$ = $<proctype>6;
+					$$->add_states(*$8);
+					parser_context->add_proctype_to_scope($$->name);
+
+					//restore context
+					parser_context->set_proctype(NULL); //leaving proctype definition
+					//parser_context->leave_isr(); //todo:uncomment when isr will work
+
+					delete $8; //proc body (list of states)
+					$1;$3;$5;$7;$9;
 				};
+
+//iCProcTypeParamList*
+proctype_param_list: proctype_param_list TCOMMA TIDENTIFIER
+			{
+				parser_context->check_identifier_defined(*$3);
+
+				$$ = $1;
+				//todo: check if var for such id is defined (in proctype?), if yes then take scope from there
+				const iCScope* scope = parser_context->get_current_scope();
+				iCProcTypeParam* id = new iCProcTypeParam(*$3, scope, *parser_context);
+				$$->push_back(id);
+				parser_context->add_proctype_param_to_scope(id);
+				delete $2;
+				delete $3;
+			}
+				| TIDENTIFIER
+			{
+				parser_context->check_identifier_defined(*$1);
+
+				$$ = new iCProcTypeParamList;
+				//todo: check if var for such id is defined, if yes then take scope from there
+				const iCScope* scope = parser_context->get_current_scope();
+				iCProcTypeParam* id = new iCProcTypeParam(*$1, scope, *parser_context);
+				$$->push_back(id);
+				parser_context->add_proctype_param_to_scope(id);
+				delete $1;
+			};
 
 //process type instantiation
 proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
@@ -499,15 +567,59 @@ proctype_instantiation: TIDENTIFIER TIDENTIFIER TLPAREN TRPAREN TSEMIC
 									$2->c_str(), scope->name.empty() ? "this scope" : scope->name.c_str());
 							}
 
-							$$ = new iCProcTypeInstantiation(ic_program, *$1, *$2, *parser_context);
+							iCIdentifierList* empty_arg_list = new iCIdentifierList();
+							$$ = new iCProcTypeInstantiation(ic_program, *$1, *$2, *empty_arg_list, *parser_context);
 							$$->set_hp("background"); //todo: other hyperprocesses
+							parser_context->add_proc_to_scope(*$2);
 							parser_context->add_to_second_pass($$);
 
 							delete $1;
 							delete $2;
+							delete empty_arg_list;
 							$3; $4; $5;
+						}
+						| TIDENTIFIER TIDENTIFIER TLPAREN ident_list TRPAREN TSEMIC
+						{
+							printf("parser: entered proctype_instantiation rule\n");
+							//check for process redefinition
+							const iCScope* scope = parser_context->get_proc_scope(*$2);
+							if (NULL != scope)
+							{
+								//process already defined - gen error, but continue parsing anyway to check for more errors
+								parser_context->err_msg("process redefinition: %s already defined in %s",
+									$2->c_str(), scope->name.empty() ? "this scope" : scope->name.c_str());
+							}
+
+							$$ = new iCProcTypeInstantiation(ic_program, *$1, *$2, *$4, *parser_context);
+							$$->set_hp("background"); //todo: other hyperprocesses
+							parser_context->add_proc_to_scope(*$2);
+							parser_context->add_to_second_pass($$);
+
+							delete $1;
+							delete $2;
+							delete $4;
+							$3; $5; $6;
 						};
-						
+
+//iCIdentifierList*
+ident_list: ident_list TCOMMA TIDENTIFIER
+					{
+						$$ = $1;
+						const iCScope* scope = parser_context->get_current_scope();
+						iCIdentifier* id = new iCIdentifier(*$3, scope, *parser_context);
+						$$->push_back(id);
+						delete $2;
+						delete $3;
+					}
+						| TIDENTIFIER
+					{
+						$$ = new iCIdentifierList;
+						const iCScope* scope = parser_context->get_current_scope();
+						iCIdentifier* id = new iCIdentifier(*$1, scope, *parser_context);
+						$$->push_back(id);
+						delete $1;
+					};
+
 //=================================================================================================
 //iCProcess object needs to be created before the states are parsed,
 //so that we have an already opened scope and a process in ParserContext when parsing the states.
@@ -751,9 +863,10 @@ c_code		:	TCCODELINE
 statement	:	TSET TSTATE TIDENTIFIER TSEMIC //set state <state_name>;
 				{
 					const iCProcess* proc = parser_context->get_process();
-					if(NULL == proc)
+					const iCProcType* proctype = parser_context->get_proctype();
+					if(NULL == proc && NULL == proctype)
 					{
-						parser_context->err_msg("state transitions can only be used inside states");
+						parser_context->err_msg("\"set state\" statement can only be used inside states");
 						$$ = NULL;
 					}
 					else
@@ -767,9 +880,10 @@ statement	:	TSET TSTATE TIDENTIFIER TSEMIC //set state <state_name>;
 			|	TSTART TPROC TIDENTIFIER TSEMIC //start process <proc_name>;
 				{
 					const iCProcess* proc = parser_context->get_process();
-					if(NULL == proc)
+					const iCProcType* proctype = parser_context->get_proctype();
+					if(NULL == proc && NULL == proctype)
 					{
-						parser_context->err_msg("start process statement can only be used inside states");
+						parser_context->err_msg("\"start process\" statement can only be used inside states");
 						$$ = NULL;
 					}
 					else
@@ -786,14 +900,15 @@ statement	:	TSET TSTATE TIDENTIFIER TSEMIC //set state <state_name>;
 			|	TSTOP TPROC TIDENTIFIER TSEMIC //stop process <proc_name>;
 				{
 					const iCProcess* proc = parser_context->get_process();
-					if(NULL == proc)
+					const iCProcType* proctype = parser_context->get_proctype();
+					if (NULL == proc && NULL == proctype)
 					{
-						parser_context->err_msg("stop process statement can only be used inside states");
+						parser_context->err_msg("\"stop process\" statement can only be used inside states");
 						$$ = NULL;
 					}
 					else
 					{
-						$$ = new iCStopProcStatement(*$3, *parser_context); 
+						$$ = new iCStopProcStatement(*$3, *parser_context);
 						parser_context->add_to_second_pass($$); // to check if process was defined
 
 						//add edge to the process graph (for DOT generation)
@@ -805,15 +920,23 @@ statement	:	TSET TSTATE TIDENTIFIER TSEMIC //set state <state_name>;
 			|	TSTOP TPROC TSEMIC //stop process;
 				{
 					const iCProcess* proc = parser_context->get_process();
-					if(NULL == proc)
+					const iCProcType* proctype = parser_context->get_proctype();
+					if (NULL == proc && NULL == proctype)
 					{
-						parser_context->err_msg("stop process statement can only be used inside states");
+						parser_context->err_msg("\"stop process\" statement can only be used inside states");
 						$$ = NULL;
 					}
 					else
 					{
-						$$ = new iCStopProcStatement(proc->name, *parser_context); 
-						parser_context->add_to_second_pass($$);
+						if (NULL != proc)
+						{
+							$$ = new iCStopProcStatement(proc->name, *parser_context);
+						}
+						else
+						{
+							$$ = new iCStopProcStatement(*parser_context);
+						}
+						parser_context->add_to_second_pass($$); // to check if process was defined
 					}
 					$1;$2;$3;//suppress unused value warning
 				}
@@ -837,7 +960,7 @@ statement	:	TSET TSTATE TIDENTIFIER TSEMIC //set state <state_name>;
 					const iCProcess* proc = parser_context->get_process();
 					if(NULL == proc)
 					{
-						parser_context->err_msg("stop hyperprocess statement can only be used inside states");
+						parser_context->err_msg("\"stop hyperprocess\" statement can only be used inside states");
 						$$ = NULL;
 					}
 					else
@@ -1056,15 +1179,39 @@ primary_expr : TTRUE   {$$ = new iCLogicConst(true, *parser_context); $1;}
 					{
 						$$ = new iCMCUIdentifier(*$1, *parser_context);
 					}
-					else // variable
+					else // variable or proctype param
 					{
 						iCVariable* var = parser_context->get_var(*$1);
-						if(NULL == var) // undeclared variable
+						if(NULL == var) // proctype param or undeclared variable
 						{
-							parser_context->err_msg("%s was not declared in this scope", $1->c_str());
-							$$ = new iCIdentifier(*$1, NULL, *parser_context);
+							const iCProcType* proctype = parser_context->get_proctype();
+							if (NULL != proctype)
+							{
+								bool id_is_proctype_param = false;
+								iCProcTypeParamList params_list = proctype->get_params();
+								for (iCProcTypeParamList::iterator i = params_list.begin(); i != params_list.end(); i++)
+								{
+									if (0 == (*i)->name.compare(*$1))
+									{
+										//todo: fill scope
+										$$ = new iCProcTypeParamUsage(*$1, *i, NULL, *parser_context);
+										id_is_proctype_param = true;
+										break;
+									}
+								}
+								if (!id_is_proctype_param)
+								{
+									parser_context->err_msg("id is not proctype param, %s was not declared in this scope", $1->c_str());
+									$$ = new iCIdentifier(*$1, NULL, *parser_context);
+								}
+							}
+							else //NULL == proctype
+							{
+								parser_context->err_msg("%s was not declared in this scope", $1->c_str());
+								$$ = new iCIdentifier(*$1, NULL, *parser_context);
+							}
 						}
-						else
+						else //NULL != var
 						{
 							const iCProcess* proc = parser_context->get_process();
 							if(NULL != proc)//added because of functions and proctypes - vars inside them don't belong to any proc

@@ -4,24 +4,28 @@
 #include "iCProcType.h"
 #include "iCProcess.h"
 #include "iCState.h"
+#include "iCNode.h"
+#include "iCIdentifier.h"
+#include "iCProcTypeParam.h"
 
 iCProcTypeInstantiation::iCProcTypeInstantiation(iCProgram* program, const std::string& proctype_name,
-	const std::string& instance_name, const ParserContext& context) : program(program), proctype_name(proctype_name), 
-	iCProcess(instance_name, context)
+	const std::string& instance_name, const iCIdentifierList& arg_list, const ParserContext& context)
+	: program(program), proctype_name(proctype_name), arg_list(arg_list), iCProcess(instance_name, context)
 {
 	printf("iCProcTypeInstantiation constructor, proctype_name = %s, instance_name = %s\n",
 		proctype_name.c_str(), instance_name.c_str());
 }
 
+iCProcTypeInstantiation::~iCProcTypeInstantiation()
+{
+	for (iCIdentifierList::iterator i = arg_list.begin(); i != arg_list.end(); i++)
+	{
+		delete *i;
+	}
+}
+
 void iCProcTypeInstantiation::second_pass()
 {
-	if (name.length() == 0)
-	{
-		printf("iCProcTypeInstantiation error - instance is empty\n");
-		return;
-	}
-	printf("iCProcTypeInstantiation instance_name is not empty, it's name=%s\n", name.c_str());
-
 	//check whether such proctype exists
 	proctype = program->find_proctype(proctype_name);
 	if (NULL == proctype)
@@ -29,7 +33,6 @@ void iCProcTypeInstantiation::second_pass()
 		err_msg("undefined process type %s", proctype_name.c_str());
 		return;
 	}
-	printf("iCProcTypeInstantiation found valid proctype %s\n", proctype->name.c_str());
 
 	program->add_process(this);
 }
@@ -40,6 +43,22 @@ void iCProcTypeInstantiation::gen_code(CodeGenContext& context)
 
 	//update context
 	context.proctype_instantiation = this;
+
+	if (arg_list.size() != proctype->get_params().size())
+	{
+		err_msg("number of arguments in instance %s (%d) isn't equal to number of parameters in proctype %s (%d)",
+			name.c_str(), arg_list.size(), proctype_name.c_str(), proctype->get_params().size());
+		return;
+	}
+
+	//assign process instance arguments to proctype params
+	iCProcTypeParamList params = proctype->get_params();
+	for (std::pair<iCProcTypeParamList::iterator, iCIdentifierList::iterator> i(params.begin(), arg_list.begin());
+		i.first != params.end(); ++i.first, ++i.second)
+	{
+		(*i.first)->original_value = (*i.second)->name;
+		(*i.first)->scoped_value = (*i.second)->get_scoped_name();
+	}
 
 	iCStateList state_list = proctype->get_states();
 	if (2 <= state_list.size())//proctype has states other than FS_START

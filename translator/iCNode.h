@@ -5,6 +5,9 @@
 class iCVariable;
 class CodeGenContext;
 class ParserContext;
+class iCIdentifierInProcType;
+class iCProcTypeParam;
+class iCProcTypeInstantiation;
 
 //=================================================================================================
 //Base class for all AST nodes
@@ -20,7 +23,7 @@ public:
 
 	iCNode(){}
 	iCNode(const ParserContext& context);
-    virtual ~iCNode() {}
+	virtual ~iCNode() {}
 
 	virtual void gen_code(CodeGenContext& context) = 0;
 	virtual void second_pass() {}
@@ -60,7 +63,10 @@ typedef std::ostringstream iCStream;
 typedef std::list<std::string> iCStringList;
 typedef std::map<std::string, iCHyperprocess*> iCHyperprocessMap;
 typedef std::map<std::string, iCProcType*> iCProctypeMap;
+typedef std::map<std::string, iCProcTypeInstantiation*> iCProctypeInstantiationMap;
 typedef std::map<std::string, iCProcess*> iCProcessMap;
 typedef std::vector<iCState*> iCStateList;
 typedef std::list<iCVariable*> iCVariablesList;
-typedef std::vector<iCIdentifier*> iCIdentifierList;
+typedef std::list<iCIdentifier*> iCIdentifierList;
+typedef std::list<iCIdentifierInProcType*> iCIdentifierInProcTypeList;
+typedef std::list<iCProcTypeParam*> iCProcTypeParamList;

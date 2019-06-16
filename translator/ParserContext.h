@@ -1,7 +1,6 @@
 #pragma once
 
 #include "iCNode.h"
-#include <stdio.h>
 #include <stdarg.h>
 
 class iCProgram;
@@ -9,6 +8,7 @@ class iCProcess;
 class iCState;
 class iCScope;
 class iCVariable;
+class iCProcTypeParam;
 class iCFunction;
 
 //=================================================================================================
@@ -19,7 +19,7 @@ class ParserContext
 {
 	const iCProgram* program; //does not own
 	iCProcType* proctype; //does not own
-	iCProcess* process; //does not own
+	iCProcess* process; //non-parameterized process, does not own
 	iCState* state; //does not own
 	iCFunction* func; //does not own
 	iCScope* root_scope; //owns
@@ -71,7 +71,6 @@ public:
 	//Add to set of iCNode*s in order to call their second_pass() methods during the secondary (post-parsing) analysis
 	void add_to_second_pass(iCNode* node)
 	{
-		printf("ParserContext: entered add_to_second_pass\n");
 		second_pass_nodes.insert(node);
 	}
 
@@ -90,12 +89,14 @@ public:
 	void open_scope(const std::string& name = "");
 	void close_scope();
 	void add_var_to_scope(iCVariable* decl);
+	void add_proctype_param_to_scope(iCProcTypeParam* param);
 	void add_state_to_scope(const std::string& name);
 	void add_proc_to_scope(const std::string& name);
 	void add_proctype_to_scope(const std::string& name);
 	void add_mcu_decl_to_scope(const std::string& name);
 	void add_func_to_scope(const std::string& func);
 
+	const iCScope* get_proctype_param_scope(const std::string& identifier)const; //todo: remove?
 	const iCScope* get_var_scope(const std::string& identifier)const;
 	const iCScope* get_mcu_decl_scope(const std::string& mcu_decl)const;
 	const iCScope* get_func_scope(const std::string& func)const;
