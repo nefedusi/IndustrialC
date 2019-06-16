@@ -14,12 +14,7 @@ public:
 	~iCProcType();
 	void add_states(const iCStateList& states);
 	bool has_state(const std::string& state_name) const;
-	void add_variable(iCVariable* var)
-	{
-		//std::cout << "iCProcType: entered add_variable " << var->name << std::endl;
-		var_list.push_back(var);
-	}
-	//const iCStateList& copy_states() const;
+	void add_variable(iCVariable* var) { var_list.push_back(var); }
 	const iCStateList& get_states() const { return states; }
 	const iCVariablesList& get_variables() const { return var_list; }
 	const iCProcTypeParamList& get_params() const { return param_list; }

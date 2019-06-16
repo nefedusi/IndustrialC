@@ -6,11 +6,12 @@ void iCIdentifierInProcType::gen_code(CodeGenContext& context)
 	std::cout << "iCIdentifierInProcType.gen_code called, name=" << name << std::endl;
 	context.set_location(line_num, filename); //todo: remove?
 
-	//todo: return if no proctype_instantiation, don't generate code
-	if (NULL != context.proctype_instantiation)
+	//context should assuredly have proctype_instantiation here, otherwise there's error in translator
+	if (NULL == context.proctype_instantiation)
 	{
-		std::cout << "iCIdentifierInProcType.gen_code proctype name=" << context.proctype_instantiation->name << std::endl;
-		context.to_code_fmt("%s_", context.proctype_instantiation->name.c_str());
+		err_msg("no proctype_instantiation found in the code gen context");
+		return;
 	}
-	context.to_code_fmt(name.c_str());
+	std::cout << "iCIdentifierInProcType.gen_code proctype name=" << context.proctype_instantiation->name << std::endl;
+	context.to_code_fmt("%s_%s", context.proctype_instantiation->name.c_str(), name.c_str());
 }

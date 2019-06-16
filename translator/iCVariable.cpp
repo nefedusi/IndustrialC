@@ -45,7 +45,6 @@ void iCVariable::gen_code( CodeGenContext& context )
 		context.to_code("]");
 	}
 
-	//std::cout << "iCVariable.gen_code: name=" << name << ", decl_initializer="<< decl_initializer << std::endl;
 	if(NULL != decl_initializer)
 	{
 		context.to_code(" = ");

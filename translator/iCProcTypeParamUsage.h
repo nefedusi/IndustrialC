@@ -1,7 +1,6 @@
 #pragma once
 
 #include "iCIdentifier.h"
-#include "CodeGenContext.h"
 #include "iCScope.h"
 #include "iCProcTypeParam.h"
 
@@ -16,7 +15,6 @@ public:
 	{
 		this->param = param;
 	}
-	//virtual ~iCProcTypeParamUsage() {}
 	void gen_code(CodeGenContext& context);
 };
 

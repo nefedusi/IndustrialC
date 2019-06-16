@@ -49,7 +49,7 @@ void iCStartProcStatement::gen_code(CodeGenContext& context)
 		started_proc_name = proctype_param->original_value;
 	}
 
-	if (in_isr) //note: we can't mark isr referenced process from parameters because it's
+	if (in_isr) //todo: fill in_isr if it's instance inside isr
 	{
 		started_proc->mark_isr_referenced();
 	}

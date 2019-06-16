@@ -33,7 +33,6 @@ void iCProcTypeInstantiation::second_pass()
 		err_msg("undefined process type %s", proctype_name.c_str());
 		return;
 	}
-	//printf("iCProcTypeInstantiation found valid proctype %s\n", proctype->name.c_str());
 
 	program->add_process(this);
 }

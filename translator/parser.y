@@ -389,7 +389,8 @@ program_item	:	var_declaration	//global var declarations
 					}
 				|	proctype_instantiation
 					{
-			//iCProcTypeInstantiation is also added to ic_program as iCProcess in iCProcTypeInstantiation::second_pass()
+						//iCProcTypeInstantiation will be also added to ic_program as iCProcess 
+						// in iCProcTypeInstantiation::second_pass()
 						if(NULL!=$1)ic_program->add_proctype_instantiation($1);
 						$$ = NULL;
 					}

@@ -236,6 +236,7 @@ void iCProgram::add_proctype_instantiation(iCProcTypeInstantiation* instantiatio
 		return;
 	}
 
+	//todo: uncomment and check this
 	/*if (NULL == first_bkgrnd_process && 0 == instantiation->activator.compare("background"))
 		first_bkgrnd_process = instantiation;*/
 
